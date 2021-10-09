@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "alamutiAPI", "alamutiAPI\al
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{10FAC36C-1675-4322-878F-94EA3155AB7A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10FAC36C-1675-4322-878F-94EA3155AB7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10FAC36C-1675-4322-878F-94EA3155AB7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10FAC36C-1675-4322-878F-94EA3155AB7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10FAC36C-1675-4322-878F-94EA3155AB7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
