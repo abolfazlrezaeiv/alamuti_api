@@ -1,3 +1,4 @@
+using application;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -32,6 +34,8 @@ namespace alamutiAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "alamutiAPI", Version = "v1" });
             });
+            services.RegisterApplicationServices(Configuration);
+            services.RegisterInfrastructerServices(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
