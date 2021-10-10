@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Domain.Entities
 {
-    class Advertisement
+    public class Advertisement
     {
         public int Id { get; set; }
         public string Title { get; set; }
