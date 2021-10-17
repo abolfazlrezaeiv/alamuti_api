@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using application.Interfaces.Data;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -12,6 +15,11 @@ namespace Infrastructure
           this IServiceCollection service,
           IConfiguration configuration)
         {
+            service.AddDbContext<AlamutDbContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("AlamutDbConttection"));
+            });
+            service.AddScoped<IAlamutDbContext>(options => options.GetService<AlamutDbContext>());
             return service;
         }
     }
