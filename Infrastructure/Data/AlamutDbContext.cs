@@ -9,6 +9,10 @@ namespace Infrastructure.Data
 {
     class AlamutDbContext : DbContext, IAlamutDbContext
     {
+        public AlamutDbContext(DbContextOptions options) : base(options)
+        {
+
+        }
         public DbSet<Advertisement> Advertisements { get; set; }
     }
 }
