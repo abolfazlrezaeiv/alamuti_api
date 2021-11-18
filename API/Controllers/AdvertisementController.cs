@@ -2,6 +2,8 @@
 using application.Interfaces.repository;
 using Domain.Entities;
 using Infrastructure.Repository;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -9,6 +11,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AdvertisementController : ControllerBase
     {
         private readonly IRepository<Advertisement> _advertisementRepository;

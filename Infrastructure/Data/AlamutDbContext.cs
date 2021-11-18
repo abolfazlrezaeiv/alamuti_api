@@ -1,5 +1,6 @@
 ﻿using application.Interfaces.Data;
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +11,7 @@ using System.Text;
 
 namespace Infrastructure.Data
 {
-    public class AlamutDbContext : DbContext , IAlamutDbContext
+    public class AlamutDbContext :IdentityDbContext , IAlamutDbContext
     {
         public AlamutDbContext(DbContextOptions<AlamutDbContext> options) : base(options)
         {
