@@ -6,7 +6,7 @@ using System.Text;
 
 namespace application.Interfaces.Data
 {
-    public interface IAlamutDbContext
+    public interface IAlamutDbContext 
     {
         public DbSet<Advertisement> Advertisements { get; set; }
     }

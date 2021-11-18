@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31019.35
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "alamutiAPI", "alamutiAPI\alamutiAPI.csproj", "{1BB64B1E-CEAC-4687-918B-79E6BA0A454A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{10FAC36C-1675-4322-878F-94EA3155AB7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "application", "application\application.csproj", "{DA91043A-7525-48E9-A7B2-83797418BB0B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "application", "application\application.csproj", "{DA91043A-7525-48E9-A7B2-83797418BB0B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "API\API.csproj", "{18A702C7-5063-4111-B5BB-1C4637651586}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1BB64B1E-CEAC-4687-918B-79E6BA0A454A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1BB64B1E-CEAC-4687-918B-79E6BA0A454A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1BB64B1E-CEAC-4687-918B-79E6BA0A454A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1BB64B1E-CEAC-4687-918B-79E6BA0A454A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{DA91043A-7525-48E9-A7B2-83797418BB0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA91043A-7525-48E9-A7B2-83797418BB0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA91043A-7525-48E9-A7B2-83797418BB0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18A702C7-5063-4111-B5BB-1C4637651586}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18A702C7-5063-4111-B5BB-1C4637651586}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18A702C7-5063-4111-B5BB-1C4637651586}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18A702C7-5063-4111-B5BB-1C4637651586}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

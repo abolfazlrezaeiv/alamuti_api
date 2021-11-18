@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using application.Interfaces.repository;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace application
              this IServiceCollection service,
              IConfiguration configuration)
         {
+
             return service;
         }
     }
