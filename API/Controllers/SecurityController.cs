@@ -27,15 +27,19 @@ namespace API.Controllers
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly AuthRepository _authRepository;
         private readonly JwtConfig _JwtConfig;
+        private readonly AlamutDbContext _context;
 
         public SecurityController(
             UserManager<IdentityUser> userManager,
             IOptionsMonitor<JwtConfig> optionsMonitor,
                 TokenValidationParameters tokenValidationParameters,
-                AuthRepository authRepository
-            )
-        {
-            _userManager = userManager;
+                AuthRepository authRepository,
+                AlamutDbContext context)
+        { 
+            _context = context;
+       
+
+        _userManager = userManager;
             _tokenValidationParameters = tokenValidationParameters;
             _authRepository = authRepository;
             _JwtConfig = optionsMonitor.CurrentValue;
@@ -166,15 +170,16 @@ namespace API.Controllers
                 IsUsed = false,
                 UserId = user.Id,
                 AddedDate = DateTime.UtcNow,
-                ExpiryDate = DateTime.UtcNow.AddYears(1),
-                IsRevoked = false,
-                Token = RandomString(25) + Guid.NewGuid()
+                ExpiryDate = DateTime.UtcNow.AddHours(6),
+                IsRevorked = false,
+                Token = RandomString(25) + Guid.NewGuid(),
+                User = user,
             };
 
 
             _authRepository.Add(refreshToken);
 
-            return new RegistrationResponseDto()
+            return new AuthResult()
             {
                 Token = jwtToken,
                 Success = true,
@@ -182,12 +187,14 @@ namespace API.Controllers
             };
         }
 
+       
+
         private string RandomString(int length)
         {
             var random = new Random();
             var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[random.Next(s.Length)]).ToArray());
+                .Select(x => x[random.Next(x.Length)]).ToArray());
         }
 
         [HttpPost]
@@ -196,29 +203,166 @@ namespace API.Controllers
         {
             if (ModelState.IsValid)
             {
-                var res = await VerifyToken(tokenRequest);
+                var result = await VerifyAndGenerateToken(tokenRequest);
 
-                if (res == null)
+                if (result == null)
                 {
                     return BadRequest(new RegistrationResponseDto()
                     {
                         Errors = new List<string>() {
-                    "Invalid tokens"
-                },
+                            "Invalid tokens"
+                        },
                         Success = false
                     });
                 }
 
-                return Ok(res);
+                return Ok(result);
             }
 
             return BadRequest(new RegistrationResponseDto()
             {
                 Errors = new List<string>() {
-                "Invalid payload"
-            },
+                    "Invalid payload"
+                },
                 Success = false
             });
+        }
+
+        private async Task<AuthResult> VerifyAndGenerateToken(TokenRequest tokenRequest)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+
+           
+                // Validation 1 - Validation JWT token format
+                var tokenInVerification = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
+
+                // Validation 2 - Validate encryption alg
+                if (validatedToken is JwtSecurityToken jwtSecurityToken)
+                {
+                    var result = jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+
+                    if (result == false)
+                    {
+                        return null;
+                    }
+                }
+
+                // Validation 3 - validate expiry date
+                var utcExpiryDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+
+                var expiryDate = UnixTimeStampToDateTime(utcExpiryDate);
+
+                if (expiryDate > DateTime.UtcNow)
+                {
+                    return new AuthResult()
+                    {
+                        Token = tokenRequest.Token,
+                        RefreshToken = tokenRequest.RefreshToken,
+                        Success = false,
+                        Errors = new List<string>() {
+                            "Token has not yet expired"
+                        }
+                    };
+                }
+
+                // validation 4 - validate existence of the token
+                var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
+
+                if (storedToken == null)
+                {
+                    return new AuthResult()
+                    {
+                        Success = false,
+                        Errors = new List<string>() {
+                            "Token does not exist"
+                        },
+                        RefreshToken = storedToken.Token,
+                        Token = tokenRequest.Token,
+                    };
+                }
+
+                // Validation 5 - validate if used
+                if (storedToken.IsUsed)
+                {
+                    return new AuthResult()
+                    {
+                        Success = false,
+                        Errors = new List<string>() {
+                            "Token has been used"
+                        },
+                        RefreshToken = storedToken.Token,
+                        Token = tokenRequest.Token,
+                    };
+                }
+
+                // Validation 6 - validate if revoked
+                if (storedToken.IsRevorked)
+                {
+                    return new AuthResult()
+                    {
+                        Success = false,
+                        Errors = new List<string>() {
+                            "Token has been revoked"
+                        },
+                        RefreshToken = storedToken.Token,
+                        Token = tokenRequest.Token,
+                    };
+                }
+
+                // Validation 7 - validate the id
+                var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+
+                if (storedToken.JwtId != jti)
+                {
+                    return new AuthResult()
+                    {
+                        Success = false,
+                        Errors = new List<string>() {
+                            "Token doesn't match"
+                        },
+                        RefreshToken = storedToken.Token,
+                        Token = tokenRequest.Token,
+                    };
+                }
+
+                // update current token 
+
+                storedToken.IsUsed = true;
+               await _authRepository.Update(storedToken);
+
+                // Generate a new token
+                var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
+                return await GenerateJwtToken(dbUser);
+           
+            //catch (Exception ex)
+            //{
+            //    if (ex.Message.Contains("Lifetime validation failed. The token is expired."))
+            //    {
+            //        var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
+
+
+            //        return new AuthResult()
+            //        {
+            //            Success = false,
+            //            Errors = new List<string>() {
+            //                "Token has expired please re-login"
+            //            } ,
+            //            RefreshToken = storedToken.Token,
+            //            Token = tokenRequest.Token,
+            //        };
+
+            //    }
+            //    else
+            //    {
+            //        return new AuthResult()
+            //        {
+            //            Success = false,
+            //            Errors = new List<string>() {
+            //                "Something went wrong."
+            //            }
+            //        };
+            //    }
+            //}
         }
 
         private async Task<AuthResult> VerifyToken(TokenRequest tokenRequest)
@@ -290,7 +434,7 @@ namespace API.Controllers
                 }
 
                 // Check if the token is revoked
-                if (storedRefreshToken.IsRevoked)
+                if (storedRefreshToken.IsRevorked)
                 {
                     return new AuthResult()
                     {
