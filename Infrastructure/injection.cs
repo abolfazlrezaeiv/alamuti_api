@@ -22,9 +22,9 @@ namespace Infrastructure
             service.AddDbContext<AlamutDbContext>(options =>
                             options.UseSqlServer(configuration.GetConnectionString("Alamut")));
 
-          
-            service.AddScoped<IAlamutDbContext,AlamutDbContext>();
+           
             service.AddScoped<IRepository<Advertisement>, AdvertisementRepository>();
+            service.AddScoped<AuthRepository>();
             return service;
         }
     }

@@ -1,4 +1,5 @@
-﻿using application.Interfaces.Data;
+﻿using application.DTOs.Requests;
+using application.Interfaces.Data;
 using application.Interfaces.repository;
 using Domain.Entities;
 using Infrastructure.Data;
@@ -26,6 +27,8 @@ namespace Infrastructure.Repository
             await _context.SaveChangesAsync();
             return entity;
         }
+
+      
 
         public async Task<Advertisement> Delete(int id)
         {

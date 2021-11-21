@@ -1,5 +1,6 @@
 ﻿using application.Interfaces.Data;
 using Domain.Entities;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -11,7 +12,7 @@ using System.Text;
 
 namespace Infrastructure.Data
 {
-    public class AlamutDbContext :IdentityDbContext , IAlamutDbContext
+    public class AlamutDbContext : IdentityDbContext, IAlamutDbContext
     {
         public AlamutDbContext(DbContextOptions<AlamutDbContext> options) : base(options)
         {
@@ -27,8 +28,8 @@ namespace Infrastructure.Data
                 new Advertisement { Id = 3, Title = "Pride", Description = "good for family", Price = 12321 });
         }
         public DbSet<Advertisement> Advertisements { get; set; }
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     }
-
 
     public class AlamutDbContextFactory : IDesignTimeDbContextFactory<AlamutDbContext>
     {
@@ -52,3 +53,5 @@ namespace Infrastructure.Data
         }
     }
 }
+
+
