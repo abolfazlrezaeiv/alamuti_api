@@ -3,6 +3,7 @@ using application.Interfaces.repository;
 using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Repository;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,7 @@ namespace Infrastructure
 
            
             service.AddScoped<IRepository<Advertisement>, AdvertisementRepository>();
+
             service.AddScoped<AuthRepository>();
             return service;
         }

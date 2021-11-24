@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AlamutDbContext))]
-    [Migration("20211121022113_initial2")]
-    partial class initial2
+    [Migration("20211122233642_assotiatingusertoads2")]
+    partial class assotiatingusertoads2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -47,32 +47,12 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Advertisements");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "stive jobs apple",
-                            Price = 11231,
-                            Title = "apple"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "ramsar porteghal",
-                            Price = 35,
-                            Title = "orage"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "good for family",
-                            Price = 12321,
-                            Title = "Pride"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>

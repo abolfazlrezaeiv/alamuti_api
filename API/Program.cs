@@ -41,21 +41,25 @@ builder.Services.AddCors(options =>
 });
 builder.Services.RegisterInfrastructerServices(builder.Configuration);
 builder.Services.RegisterApplicationServices(builder.Configuration);
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 });
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtConfig"));
 var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
+
+
+Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 var tokenValidationParameters = new TokenValidationParameters
 {
     ValidateIssuerSigningKey = true,
     IssuerSigningKey = new SymmetricSecurityKey(key),
     ValidateIssuer = false,
     ValidateAudience = false,
-    ValidateLifetime = false,
+    ValidateLifetime = true,
     RequireExpirationTime = false,
-    ClockSkew = TimeSpan.Zero
 };
 builder.Services.AddSingleton(tokenValidationParameters);
 builder.Services.AddAuthentication(options =>

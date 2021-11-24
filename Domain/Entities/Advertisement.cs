@@ -12,6 +12,8 @@ namespace Domain.Entities
         public int Price { get; set; }
         public byte[]? Photo { get; set; }
         public DateTime? DatePosted { get; set; }
+        public string UserId { get; set; }
+        public string UserName { get; set; }
 
     }
 }

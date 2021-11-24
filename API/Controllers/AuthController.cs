@@ -21,7 +21,7 @@ namespace API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SecurityController : ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly TokenValidationParameters _tokenValidationParameters;
@@ -29,7 +29,7 @@ namespace API.Controllers
         private readonly JwtConfig _JwtConfig;
         private readonly AlamutDbContext _context;
 
-        public SecurityController(
+        public AuthController(
             UserManager<IdentityUser> userManager,
             IOptionsMonitor<JwtConfig> optionsMonitor,
                 TokenValidationParameters tokenValidationParameters,
@@ -168,11 +168,11 @@ namespace API.Controllers
             {
                 JwtId = token.Id,
                 IsUsed = false,
+                IsRevorked = false,
                 UserId = user.Id,
                 AddedDate = DateTime.UtcNow,
-                ExpiryDate = DateTime.UtcNow.AddHours(6),
-                IsRevorked = false,
-                Token = RandomString(25) + Guid.NewGuid(),
+                ExpiryDate = DateTime.UtcNow.AddMonths(1),
+                Token = RandomString(35) + Guid.NewGuid(),
                 User = user,
             };
 
@@ -232,7 +232,12 @@ namespace API.Controllers
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
-           
+
+            try
+            {
+
+
+
                 // Validation 1 - Validation JWT token format
                 var tokenInVerification = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
 
@@ -328,41 +333,41 @@ namespace API.Controllers
                 // update current token 
 
                 storedToken.IsUsed = true;
-               await _authRepository.Update(storedToken);
+                await _authRepository.Update(storedToken);
 
                 // Generate a new token
                 var dbUser = await _userManager.FindByIdAsync(storedToken.UserId);
                 return await GenerateJwtToken(dbUser);
-           
-            //catch (Exception ex)
-            //{
-            //    if (ex.Message.Contains("Lifetime validation failed. The token is expired."))
-            //    {
-            //        var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
+
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message.Contains("Lifetime validation failed. The token is expired."))
+                {
 
 
-            //        return new AuthResult()
-            //        {
-            //            Success = false,
-            //            Errors = new List<string>() {
-            //                "Token has expired please re-login"
-            //            } ,
-            //            RefreshToken = storedToken.Token,
-            //            Token = tokenRequest.Token,
-            //        };
+                    return new AuthResult()
+                    {
+                        Success = false,
+                        Errors = new List<string>() {
+                            "Token has expired please re-login"
+                        },
+                       
+                        Token = tokenRequest.Token,
+                    };
 
-            //    }
-            //    else
-            //    {
-            //        return new AuthResult()
-            //        {
-            //            Success = false,
-            //            Errors = new List<string>() {
-            //                "Something went wrong."
-            //            }
-            //        };
-            //    }
-            //}
+                }
+                else
+                {
+                    return new AuthResult()
+                    {
+                        Success = false,
+                        Errors = new List<string>() {
+                            "Something went wrong."
+                        }
+                    };
+                }
+            }
         }
 
         private async Task<AuthResult> VerifyToken(TokenRequest tokenRequest)
@@ -472,7 +477,7 @@ namespace API.Controllers
         private DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch
-            System.DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             dtDateTime = dtDateTime.AddSeconds(unixTimeStamp).ToUniversalTime();
             return dtDateTime;
         }

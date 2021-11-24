@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AlamutDbContext))]
-    [Migration("20211121001730_initial")]
-    partial class initial
+    [Migration("20211122234026_assotiatingusertoads3")]
+    partial class assotiatingusertoads3
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -47,32 +47,15 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Advertisements");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "stive jobs apple",
-                            Price = 11231,
-                            Title = "apple"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "ramsar porteghal",
-                            Price = 35,
-                            Title = "orage"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "good for family",
-                            Price = 12321,
-                            Title = "Pride"
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.RefreshToken", b =>
@@ -89,7 +72,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsRevoked")
+                    b.Property<bool>("IsRevorked")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsUsed")

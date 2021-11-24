@@ -4,8 +4,9 @@ using Domain.Entities;
 using Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -15,10 +16,14 @@ namespace API.Controllers
     public class AdvertisementController : ControllerBase
     {
         private readonly IRepository<Advertisement> _advertisementRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public AdvertisementController(IRepository<Advertisement> advertisementRepository)
+        public AdvertisementController(IRepository<Advertisement> advertisementRepository,IHttpContextAccessor httpContextAccessor,UserManager<IdentityUser> userManager)
         {
             _advertisementRepository = advertisementRepository;
+            _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
 
@@ -37,9 +42,14 @@ namespace API.Controllers
 
 
         [HttpPost]
-        public Task<Advertisement> Post([FromBody] Advertisement  advertisement)
+        public  async Task<Advertisement> Post([FromBody] Advertisement  advertisement)
         {
-            return _advertisementRepository.Add(advertisement);
+
+            var user =await _userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            advertisement.UserId = user.Id;
+            advertisement.UserName = user.UserName;
+
+            return await _advertisementRepository.Add(advertisement);
         }
 
 
