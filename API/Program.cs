@@ -31,10 +31,7 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<AuthResponsesOperationFilter>();
 
 });
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("Open", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Open", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
@@ -60,6 +57,7 @@ var tokenValidationParameters = new TokenValidationParameters
     ValidateAudience = false,
     ValidateLifetime = true,
     RequireExpirationTime = false,
+    
 };
 builder.Services.AddSingleton(tokenValidationParameters);
 builder.Services.AddAuthentication(options =>
@@ -67,6 +65,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+   
 })
     .AddJwtBearer(jwt =>
     {
@@ -75,8 +74,19 @@ builder.Services.AddAuthentication(options =>
         jwt.TokenValidationParameters = tokenValidationParameters;
     });
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<AlamutDbContext>();
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(
+    options =>
+    {
+        options.SignIn.RequireConfirmedAccount = true;
+        options.User.RequireUniqueEmail = false;
+        options.SignIn.RequireConfirmedEmail = false;
+        
+
+    }).AddEntityFrameworkStores<AlamutDbContext>();
+    
+    
+   
+
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {

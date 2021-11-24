@@ -51,21 +51,21 @@ namespace API.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existingUser = await _userManager.FindByEmailAsync(user.Email);
+                var existingUser = await _userManager.FindByNameAsync(user.PhoneNumber);
                 if (existingUser != null)
                 {
                     return BadRequest(new RegistrationResponseDto()
                     {
                         Errors = new List<string>()
                         {
-                            "Email already in use"
+                            "نام کاربری تکراری"
                         },
                         Success = false
                     });
                 }
 
-                var newUser = new IdentityUser() { Email = user.Email , UserName = user.Username};
-                var isCreated = await _userManager.CreateAsync(newUser,user.Password);
+                var newUser = new IdentityUser() {  UserName = user.PhoneNumber  };
+                var isCreated = await _userManager.CreateAsync(newUser, "@Alamuti2643");
                
                 if (!isCreated.Succeeded)
                 {
@@ -77,7 +77,7 @@ namespace API.Controllers
                     });
                    
                 }
-                var createdUser = await _userManager.FindByEmailAsync(user.Email);
+                var createdUser = await _userManager.FindByNameAsync(user.PhoneNumber);
                 return Ok(await GenerateJwtToken(createdUser));
             }
             else
@@ -98,7 +98,7 @@ namespace API.Controllers
         {
             if (ModelState.IsValid)
             {
-                var existingUser = await _userManager.FindByEmailAsync(user.Email);
+                var existingUser = await _userManager.FindByNameAsync(user.PhoneNumber);
                 if (existingUser == null)
                 {
                     return BadRequest(new RegistrationResponseDto()
@@ -111,7 +111,7 @@ namespace API.Controllers
                     });
                 }
 
-                var isCorrect = await _userManager.CheckPasswordAsync(existingUser, user.Password);
+                var isCorrect = await _userManager.CheckPasswordAsync(existingUser, "@Alamuti2643");
 
                 if (!isCorrect)
                 {
@@ -153,8 +153,8 @@ namespace API.Controllers
                 Subject = new ClaimsIdentity(new[]
                 {
             new Claim("Id", user.Id),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+             new Claim(JwtRegisteredClaimNames.Name, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         }),
                 Expires = DateTime.UtcNow.AddSeconds(30),
