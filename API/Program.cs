@@ -15,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.Configure<IISOptions>(builder.Configuration);
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -80,8 +81,8 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(
         options.SignIn.RequireConfirmedAccount = true;
         options.User.RequireUniqueEmail = false;
         options.SignIn.RequireConfirmedEmail = false;
-        
-
+        options.Password.RequireDigit = false;
+        options.Password.RequiredLength = 4;
     }).AddEntityFrameworkStores<AlamutDbContext>();
     
     

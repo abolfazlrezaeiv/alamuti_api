@@ -1,11 +1,9 @@
 ﻿using application;
 using application.DTOs.Requests;
 using application.DTOs.Responses;
-using application.Interfaces.repository;
 using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Repository;
-using Lski.RandomString;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +13,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace API.Controllers
 {
@@ -45,40 +42,44 @@ namespace API.Controllers
             _JwtConfig = optionsMonitor.CurrentValue;
         }
 
-        // GET: api/<SecurityController>
-        [HttpPost("/registration")]
+
+        [HttpPost("/register")]
         public async Task<IActionResult> Register([FromBody] UserRegistrationDto user)
         {
+            if (user == null) return BadRequest();
+
+            var generatedNumber = GenerateRandomNo();
+
             if (ModelState.IsValid)
             {
                 var existingUser = await _userManager.FindByNameAsync(user.PhoneNumber);
+
+                var sms = new Ghasedak.Core.Api("47541ce5eed0c53032beda134b59199b7d7da859ef6c9c25de5b06f7a9de0798");
+
+                await sms.SendSMSAsync($"کد عضویت شما {generatedNumber} می باشد ", "09904640760", "10008566");
+
                 if (existingUser != null)
                 {
-                    return BadRequest(new RegistrationResponseDto()
-                    {
-                        Errors = new List<string>()
-                        {
-                            "نام کاربری تکراری"
-                        },
-                        Success = false
-                    });
+                    existingUser.PasswordHash = _userManager.PasswordHasher.HashPassword(existingUser,generatedNumber.ToString());
+                    await _userManager.UpdateAsync(existingUser);
+                    return Ok(existingUser);
                 }
 
                 var newUser = new IdentityUser() {  UserName = user.PhoneNumber  };
-                var isCreated = await _userManager.CreateAsync(newUser, "@Alamuti2643");
-               
+
+                var isCreated = await _userManager.CreateAsync(newUser, generatedNumber.ToString());
+
                 if (!isCreated.Succeeded)
                 {
                     return BadRequest(new RegistrationResponseDto()
                     {
                         Errors = isCreated.Errors.Select(X => X.Description).ToList(),
                         Success = false,
-
                     });
-                   
                 }
                 var createdUser = await _userManager.FindByNameAsync(user.PhoneNumber);
-                return Ok(await GenerateJwtToken(createdUser));
+               
+                return Ok(createdUser);
             }
             else
             {
@@ -111,7 +112,7 @@ namespace API.Controllers
                     });
                 }
 
-                var isCorrect = await _userManager.CheckPasswordAsync(existingUser, "@Alamuti2643");
+                var isCorrect = await _userManager.CheckPasswordAsync(existingUser, user.VerificationCode);
 
                 if (!isCorrect)
                 {
@@ -157,7 +158,7 @@ namespace API.Controllers
             new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         }),
-                Expires = DateTime.UtcNow.AddSeconds(30),
+                Expires = DateTime.UtcNow.AddMinutes(10),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -235,9 +236,6 @@ namespace API.Controllers
 
             try
             {
-
-
-
                 // Validation 1 - Validation JWT token format
                 var tokenInVerification = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
 
@@ -472,6 +470,14 @@ namespace API.Controllers
             {
                 return null;
             }
+        }
+
+        private int GenerateRandomNo()
+        {
+            int _min = 1000;
+            int _max = 9999;
+            Random _rdm = new Random();
+            return _rdm.Next(_min, _max);
         }
 
         private DateTime UnixTimeStampToDateTime(double unixTimeStamp)

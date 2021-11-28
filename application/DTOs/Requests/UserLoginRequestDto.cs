@@ -12,6 +12,7 @@ namespace application.DTOs.Requests
         [Required]
         [Phone]
         public string PhoneNumber { get; set; }
-       
+        public string VerificationCode { get; set; }
+
     }
 }

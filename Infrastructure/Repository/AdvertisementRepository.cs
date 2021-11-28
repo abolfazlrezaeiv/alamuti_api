@@ -23,6 +23,7 @@ namespace Infrastructure.Repository
         }
         public async Task<Advertisement> Add(Advertisement entity)
         {
+           
             _context.Advertisements.Add(entity);
             await _context.SaveChangesAsync();
             return entity;
@@ -32,6 +33,7 @@ namespace Infrastructure.Repository
 
         public async Task<Advertisement> Delete(int id)
         {
+           
             var entity = await _context.Advertisements.FindAsync(id);
             if (entity == null)
             {

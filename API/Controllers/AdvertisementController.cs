@@ -18,12 +18,15 @@ namespace API.Controllers
         private readonly IRepository<Advertisement> _advertisementRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<IdentityUser> _userManager;
+     
+
+      
 
         public AdvertisementController(IRepository<Advertisement> advertisementRepository,IHttpContextAccessor httpContextAccessor,UserManager<IdentityUser> userManager)
         {
             _advertisementRepository = advertisementRepository;
             _httpContextAccessor = httpContextAccessor;
-            _userManager = userManager;
+            _userManager = userManager; 
         }
 
 
@@ -42,16 +45,43 @@ namespace API.Controllers
 
 
         [HttpPost]
-        public  async Task<Advertisement> Post([FromBody] Advertisement  advertisement)
+        public  async Task<Advertisement> Post([FromForm] Advertisement  advertisement)
         {
-
-            var user =await _userManager.FindByEmailAsync(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+           
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _userManager.FindByNameAsync(userId);
             advertisement.UserId = user.Id;
-            advertisement.UserName = user.UserName;
 
+            foreach (var file in Request.Form.Files)
+            {
+                Image img = new Image();
+                img.ImageTitle = file.FileName;
+                MemoryStream ms = new MemoryStream();
+                file.CopyTo(ms);
+                advertisement.photo = ms.ToArray();
+                ms.Close();
+                ms.Dispose();
+            }
             return await _advertisementRepository.Add(advertisement);
         }
 
+        //[HttpPost("imagesend")]
+        //public async Task<Advertisement> AddImage([FromForm] Advertisement advertisement)
+        //{
+
+
+        //    foreach (var file in Request.Form.Files)
+        //    {
+        //        Image img = new Image();
+        //        img.ImageTitle = file.FileName;
+        //        MemoryStream ms = new MemoryStream();
+        //        file.CopyTo(ms);
+        //        advertisement.photo = ms.ToArray();
+        //        ms.Close();
+        //        ms.Dispose();
+        //    }
+        //    return await _advertisementRepository.Update(advertisement);
+        //}
 
         [HttpPut]
         public Task<Advertisement> Put([FromBody] Advertisement advertisement)
