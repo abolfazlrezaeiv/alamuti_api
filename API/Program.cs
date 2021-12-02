@@ -50,6 +50,12 @@ var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
 
 
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+
+
+ 
+
+
+
 var tokenValidationParameters = new TokenValidationParameters
 {
     ValidateIssuerSigningKey = true,
@@ -58,13 +64,14 @@ var tokenValidationParameters = new TokenValidationParameters
     ValidateAudience = false,
     ValidateLifetime = true,
     RequireExpirationTime = false,
-    
+    ClockSkew = TimeSpan.Zero
 };
+
 builder.Services.AddSingleton(tokenValidationParameters);
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
    
 })
@@ -75,18 +82,20 @@ builder.Services.AddAuthentication(options =>
         jwt.TokenValidationParameters = tokenValidationParameters;
     });
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(
+builder.Services.AddIdentityCore<IdentityUser>(
     options =>
     {
         options.SignIn.RequireConfirmedAccount = true;
         options.User.RequireUniqueEmail = false;
         options.SignIn.RequireConfirmedEmail = false;
-        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireDigit = true;
         options.Password.RequiredLength = 4;
     }).AddEntityFrameworkStores<AlamutDbContext>();
     
-    
-   
+
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

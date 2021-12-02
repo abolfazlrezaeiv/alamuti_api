@@ -50,7 +50,9 @@ namespace API.Controllers
            
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await _userManager.FindByNameAsync(userId);
+
             advertisement.UserId = user.Id;
+
 
             foreach (var file in Request.Form.Files)
             {
@@ -65,23 +67,6 @@ namespace API.Controllers
             return await _advertisementRepository.Add(advertisement);
         }
 
-        //[HttpPost("imagesend")]
-        //public async Task<Advertisement> AddImage([FromForm] Advertisement advertisement)
-        //{
-
-
-        //    foreach (var file in Request.Form.Files)
-        //    {
-        //        Image img = new Image();
-        //        img.ImageTitle = file.FileName;
-        //        MemoryStream ms = new MemoryStream();
-        //        file.CopyTo(ms);
-        //        advertisement.photo = ms.ToArray();
-        //        ms.Close();
-        //        ms.Dispose();
-        //    }
-        //    return await _advertisementRepository.Update(advertisement);
-        //}
 
         [HttpPut]
         public Task<Advertisement> Put([FromBody] Advertisement advertisement)
