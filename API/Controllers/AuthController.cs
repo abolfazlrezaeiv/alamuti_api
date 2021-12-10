@@ -62,7 +62,7 @@ namespace API.Controllers
                 {
                     existingUser.PasswordHash = _userManager.PasswordHasher.HashPassword(existingUser,generatedNumber.ToString());
                     await _userManager.UpdateAsync(existingUser);
-                    return Ok(existingUser);
+                    return Ok(new { id = existingUser.Id, phonenumber = existingUser.UserName });
                 }
 
                 var newUser = new IdentityUser() {  UserName = user.PhoneNumber  };
@@ -79,7 +79,7 @@ namespace API.Controllers
                 }
                 var createdUser = await _userManager.FindByNameAsync(user.PhoneNumber);
                
-                return Ok(createdUser);
+                return Ok(new { id = createdUser.Id , phonenumber = createdUser.UserName});
             }
             else
             {
@@ -126,8 +126,9 @@ namespace API.Controllers
                         Success = false,
                     });
                 }
+                var result = await GenerateJwtToken(existingUser);
 
-                return Ok(await GenerateJwtToken(existingUser));
+                return Ok(new {token = result.Token , refreshToken = result.RefreshToken});
 
 
             }
@@ -157,7 +158,7 @@ namespace API.Controllers
                     new Claim(JwtRegisteredClaimNames.Name, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 }),
-                Expires = DateTime.UtcNow.AddSeconds(20),
+                Expires = DateTime.UtcNow.AddSeconds(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
@@ -239,7 +240,7 @@ namespace API.Controllers
                 _tokenValidationParameters.ValidateLifetime = false;
                 // Validation 1 - Validation JWT token format
                 var tokenInVerification = jwtTokenHandler.ValidateToken(tokenRequest.Token, _tokenValidationParameters, out var validatedToken);
-
+                _tokenValidationParameters.ValidateLifetime = true;
                 // Validation 2 - Validate encryption alg
                 if (validatedToken is JwtSecurityToken jwtSecurityToken)
                 {
