@@ -52,10 +52,6 @@ var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 
 
- 
-
-
-
 var tokenValidationParameters = new TokenValidationParameters
 {
     ValidateIssuerSigningKey = true,
