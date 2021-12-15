@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AlamutDbContext))]
-    [Migration("20211122234026_assotiatingusertoads3")]
-    partial class assotiatingusertoads3
+    [Migration("20211214000629_INITIALMIGRATION")]
+    partial class INITIALMIGRATION
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -38,9 +38,6 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("Photo")
-                        .HasColumnType("varbinary(max)");
-
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
@@ -50,8 +47,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("photo")
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("Id");
 

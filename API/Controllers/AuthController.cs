@@ -79,7 +79,7 @@ namespace API.Controllers
                 }
                 var createdUser = await _userManager.FindByNameAsync(user.PhoneNumber);
                
-                return Ok(new { id = createdUser.Id , phonenumber = createdUser.UserName});
+                return Ok(new { id = createdUser.Id , phonenumber = createdUser.UserName,});
             }
             else
             {
@@ -128,7 +128,7 @@ namespace API.Controllers
                 }
                 var result = await GenerateJwtToken(existingUser);
 
-                return Ok(new {token = result.Token , refreshToken = result.RefreshToken});
+                return Ok(new {token = result.Token , refreshToken = result.RefreshToken,success = result.Success});
 
 
             }
@@ -158,7 +158,7 @@ namespace API.Controllers
                     new Claim(JwtRegisteredClaimNames.Name, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 }),
-                Expires = DateTime.UtcNow.AddSeconds(30),
+                Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

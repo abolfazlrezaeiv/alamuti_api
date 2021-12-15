@@ -36,9 +36,6 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("Photo")
-                        .HasColumnType("varbinary(max)");
-
                     b.Property<int>("Price")
                         .HasColumnType("int");
 
@@ -48,8 +45,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserName")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte[]>("photo")
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("Id");
 

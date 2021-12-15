@@ -1,4 +1,5 @@
-﻿using application.Interfaces.Data;
+﻿using application.DTOs;
+using application.Interfaces.Data;
 using application.Interfaces.repository;
 using Domain.Entities;
 using Infrastructure.Repository;
@@ -31,9 +32,16 @@ namespace API.Controllers
 
 
         [HttpGet]
-        public Task<IEnumerable<Advertisement>> Get() 
+        public async Task<IEnumerable<AdvertisementDto>> Get() 
         { 
-            return _advertisementRepository.GetAll();
+             return  _advertisementRepository.GetAll().Result.Select(x=> new AdvertisementDto { 
+                 Title = x.Title,Id = x.Id,
+                 Price= x.Price,
+                 Photo=x.photo,
+                 Description=x.Description,
+                 DatePosted=x.DatePosted,
+                 DaySended = x.DatePosted.ToString()
+             });
         }
 
 
@@ -47,11 +55,17 @@ namespace API.Controllers
         [HttpPost]
         public  async Task<Advertisement> Post([FromForm] Advertisement  advertisement)
         {
-           
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _userManager.FindByNameAsync(userId);
+            var userId = User.Claims.FirstOrDefault().Value;
+            var currentuser = await _userManager.FindByIdAsync(userId);
+            //8c2b9c88 - 3c8b - 4d41 - b7dc - 399c8e66a643
+            //var username2 = User.Claims.FirstOrDefault();
+            //var userId = User.FindFirstValue(ClaimTypes.Name);
+            //var userId2 = this.User.FindFirstValue(ClaimTypes.Uri);
+            //var userId3 = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //var userId4 = this.User.FindFirstValue(ClaimTypes.Name);
 
-            advertisement.UserId = user.Id;
+            //var user = await _userManager.FindByNameAsync(userId);
+            advertisement.UserId = currentuser.Id;
 
 
             foreach (var file in Request.Form.Files)
@@ -69,7 +83,7 @@ namespace API.Controllers
 
 
         [HttpPut]
-        public Task<Advertisement> Put([FromBody] Advertisement advertisement)
+        public Task<Advertisement> Put([FromForm] Advertisement advertisement)
         {
             return _advertisementRepository.Update(advertisement);
         }

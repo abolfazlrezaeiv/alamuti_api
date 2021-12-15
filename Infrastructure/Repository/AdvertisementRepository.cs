@@ -23,7 +23,6 @@ namespace Infrastructure.Repository
         }
         public async Task<Advertisement> Add(Advertisement entity)
         {
-           
             _context.Advertisements.Add(entity);
             await _context.SaveChangesAsync();
             return entity;
@@ -53,6 +52,7 @@ namespace Infrastructure.Repository
 
         public async Task<IEnumerable<Advertisement>> GetAll()
         {
+
             return await _context.Advertisements.ToListAsync();
         }
 
