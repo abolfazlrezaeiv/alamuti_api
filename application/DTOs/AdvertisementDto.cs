@@ -34,17 +34,17 @@ namespace application.DTOs
                 }
 
                 var aValue = new SortedList<double, Func<string>>();
-                aValue.Add(0.75, () => "کمتراز یک دقیقه ");
-                aValue.Add(1.5, () => " یک دقیقه");
-                aValue.Add(45, () => string.Format("در " + "{0} دقیقه " + "پیش", Math.Round(TotalMinutes)));
-                aValue.Add(90, () => "یک ساعت پیش");
-                aValue.Add(1440, () => string.Format("در" + " {0} ساعت " + "پیش ", Math.Round(Math.Abs(oSpan.TotalHours))));
-                aValue.Add(2880, () => "یک روز پیش"); 
-                aValue.Add(43200, () => string.Format("در" + " {0} روز " + "پیش ", Math.Floor(Math.Abs(oSpan.TotalDays)))); 
-                aValue.Add(86400, () => "یک ماه پیش"); 
-                aValue.Add(525600, () => string.Format("در" + " {0} ماه " + "پیش ", Math.Floor(Math.Abs(oSpan.TotalDays / 30)))); 
-                aValue.Add(1051200, () => "یک سال پیش"); 
-                aValue.Add(double.MaxValue, () => string.Format("ثبت در" + " {0} سال " + "پیش ", Math.Floor(Math.Abs(oSpan.TotalDays / 365))));
+                aValue.Add(0.75, () => "لحظاتی پیش ");
+                aValue.Add(1.5, () => "دقایقی پیش");
+                aValue.Add(45, () => string.Format( " {0} دقیقه " + "پیش", Math.Round(TotalMinutes)));
+                aValue.Add(90, () => "1 ساعت پیش");
+                aValue.Add(1440, () => string.Format( " {0} ساعت " + "پیش ", Math.Round(Math.Abs(oSpan.TotalHours))));
+                aValue.Add(2880, () => "1 روز پیش"); 
+                aValue.Add(43200, () => string.Format( " {0} روز " + "پیش ", Math.Floor(Math.Abs(oSpan.TotalDays)))); 
+                aValue.Add(86400, () => "1 ماه پیش"); 
+                aValue.Add(525600, () => string.Format( " {0} ماه " + "پیش ", Math.Floor(Math.Abs(oSpan.TotalDays / 30)))); 
+                aValue.Add(1051200, () => "1 سال پیش"); 
+                aValue.Add(double.MaxValue, () => string.Format( " {0} سال " + "پیش ", Math.Floor(Math.Abs(oSpan.TotalDays / 365))));
 
                 persianDateForFlutter = aValue.First(n => TotalMinutes < n.Key).Value.Invoke() ;
              
