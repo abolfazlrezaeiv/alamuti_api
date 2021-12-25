@@ -19,19 +19,33 @@ namespace Infrastructure.Data
 
         public AlamutDbContext(DbContextOptions<AlamutDbContext> options) : base(options)
         {
-           
+          
         }
 
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    base.OnModelCreating(modelBuilder);
-        //    modelBuilder.Entity<Advertisement>().HasData(
-        //        new Advertisement {Id=1, Title = "apple", Description = "stive jobs apple", Price = 11231 },
-        //        new Advertisement { Id = 2, Title = "orage", Description = "ramsar porteghal", Price = 35 },
-        //        new Advertisement { Id = 3, Title = "Pride", Description = "good for family", Price = 12321 });
-        //}
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            //modelBuilder.Entity<ChatGroup>()
+            //    .HasMany(b => b.Messages)
+            //    .WithOne(e => e.ChatGroup)
+            //    .IsRequired();
+
+
+            modelBuilder.Entity<ChatMessage>()
+             .HasOne(p => p.ChatGroup)
+             .WithMany(b => b.Messages)
+              .HasForeignKey(p => p.ChatGroupId);
+
+            modelBuilder.Entity<ChatGroup>()
+             .Navigation(b => b.Messages)
+             .UsePropertyAccessMode(PropertyAccessMode.Property);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
         public DbSet<Advertisement> Advertisements { get; set; }
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<ChatMessage> Messages{ get; set; }
+        public  DbSet<ChatGroup>  ChatGroups { get; set; }
     }
 
     public class AlamutDbContextFactory : IDesignTimeDbContextFactory<AlamutDbContext>

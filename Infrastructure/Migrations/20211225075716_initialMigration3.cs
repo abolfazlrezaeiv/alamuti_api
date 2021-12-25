@@ -4,7 +4,7 @@
 
 namespace Infrastructure.Migrations
 {
-    public partial class _123 : Migration
+    public partial class initialMigration3 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

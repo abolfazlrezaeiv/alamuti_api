@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace application.Interfaces.repository
         Task<IEntity> Get(int id);
         Task<IEntity> Add(IEntity entity);
         Task<IEntity> Update(IEntity entity);
-        Task<IEntity> Delete(int id);
+        Task<IEntity> Delete(IEntity entity);
+
     }
 }

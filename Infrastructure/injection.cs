@@ -24,9 +24,10 @@ namespace Infrastructure
                             options.UseSqlServer(configuration.GetConnectionString("Alamut")));
 
            
-            service.AddScoped<IRepository<Advertisement>, AdvertisementRepository>();
+            service.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
 
             service.AddScoped<AuthRepository>();
+            service.AddScoped<MessageRepository>();
             return service;
         }
     }
