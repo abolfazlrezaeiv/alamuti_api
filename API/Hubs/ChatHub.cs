@@ -20,13 +20,13 @@ namespace API
         }
 
       
-        public async Task SendMessage(string receiverId,string senderId, string message,string? groupname1,string grouptitle)
+        public async Task SendMessage(string receiverId,string senderId, string message,string? groupname1,string grouptitle,string groupImage)
         {
             var groupname2 = $"{receiverId + senderId}";
             await Groups.AddToGroupAsync(Context.ConnectionId,groupname1 ??  groupname2);
 
-            await Clients.Group(groupname1 ?? groupname2).SendAsync("ReceiveMessage",receiverId,senderId,message, groupname1 ?? groupname2, grouptitle);
-            //await _repository.AddGroup(new ChatGroup() { Name = groupname1 ?? groupname2 ,Title = grouptitle});
+            await Clients.Group(groupname1 ?? groupname2).SendAsync("ReceiveMessage",receiverId,senderId,message, groupname1 ?? groupname2, grouptitle,groupImage);
+            await _repository.AddGroup(new ChatGroup() { Name = groupname1 ?? groupname2, Title = grouptitle ,Image = groupImage});
             await _repository.AddMessageToGroup(groupname1 ?? groupname2, new ChatMessage { Sender = senderId, Reciever = receiverId, DateSended = DateTime.UtcNow, Message = message, GroupName = groupname1 ?? groupname2, });
 
             //await _repository.Add(new ChatMessage { Sender = senderId, Reciever = receiverId, DateSended = DateTime.UtcNow, Message = message });

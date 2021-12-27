@@ -1,4 +1,5 @@
 ﻿using application.DTOs;
+using application.DTOs.Chat;
 using application.Interfaces.Data;
 using application.Interfaces.repository;
 using Domain.Entities;
@@ -30,14 +31,23 @@ namespace API.Controllers
         public async Task<IEnumerable<ChatMessage>> Get()
         {
             return await _messageRepository.GetAllMessages();
-
         }
 
 
         [HttpGet("massages/{groupname}")]
-        public async Task<IEnumerable<ChatMessage>> Get(string groupname)
+        public async Task<IEnumerable<ChatMessageDto>> Get(string groupname)
         {
-            return await _messageRepository.GetMessages(groupname);
+            return  _messageRepository.GetMessages(groupname).Result.Select(x=>new ChatMessageDto() 
+            { 
+                Sender = x.Sender,
+                Reciever = x.Reciever,
+                Id = x.Id,
+                DateSended = x.DateSended,
+                GroupName = groupname,
+                Message = x.Message,
+                DaySended = x.DateSended.ToString()
+
+            });
 
         }
 
@@ -52,14 +62,30 @@ namespace API.Controllers
         }
 
         [HttpGet("groupswithmessages")]
-        public async Task<IEnumerable<ChatGroup>> GetGroupsWithMessages()
+        public async Task<IEnumerable<ChatGroupDto>> GetGroupsWithMessages()
         {
             var userId = User.Claims.FirstOrDefault().Value;
             var currentuser = await _userManager.FindByIdAsync(userId);
-            return _messageRepository.GetGroupWithMessages().Result.Where(x => x.Name.Contains(currentuser.Id));
+            return _messageRepository.GetGroupWithMessages().Result.Where(x => x.Name.Contains(currentuser.Id))
+                .Select(group=>new ChatGroupDto()
+                {Name = group.Name,
+                Id = group.Id,
+                IsChecked = group.IsChecked,
+                Image = group.Image,
+                Title = group.Title,
+                
+                    LastMessage = new ChatMessageDto()
+                    {
+                        DateSended = group.Messages.Last().DateSended,
+                        DaySended = group.Messages.Last().DateSended.ToString(),
+                        GroupName = group.Messages.Last().GroupName,
+                        Message = group.Messages.Last().Message,
+                        Id = group.Messages.Last().Id,
+                        Reciever = group.Messages.Last().Reciever,
+                        Sender = group.Messages.Last().Sender,
+                    }
+                });
         }
-
-
 
 
 

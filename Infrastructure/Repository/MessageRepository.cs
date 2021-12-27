@@ -75,7 +75,7 @@ namespace Infrastructure.Repository
         public async Task<List<ChatGroup>> GetGroupWithMessages()
         {
             var groups =await _context.ChatGroups
-                     .Include(b => b.Messages).ToListAsync();
+                     .Include(b => b.Messages.OrderBy(x=>x.DateSended)).ToListAsync();
                      
             return groups;
         }
