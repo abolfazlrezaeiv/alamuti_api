@@ -67,6 +67,18 @@ namespace Infrastructure.Repository
             return  _context.Messages.Where(x => x.GroupName == groupName).OrderBy(x=>x.DateSended).Last();
         }
 
+        public async Task<ChatGroup> DeleteGroup(string groupName)
+        {
+
+            var group =  _context.ChatGroups.Where(x => x.Name == groupName).First();
+            if (group != null)
+            {
+                _context.ChatGroups.Remove(group);
+                return group;
+            }
+            return null;
+        }
+
         public  async Task<IEnumerable<ChatGroup>> GetAllGroup()
         {
             return await _context.ChatGroups.ToListAsync();
@@ -79,6 +91,8 @@ namespace Infrastructure.Repository
                      
             return groups;
         }
+
+
 
         public async Task<ChatGroup> UpdateGroup(ChatGroup group)
         {

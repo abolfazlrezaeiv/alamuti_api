@@ -51,6 +51,22 @@ namespace API.Controllers
 
         }
 
+        [HttpDelete("group/{groupname}")]
+        public async Task<ChatGroup> DeleteGroup(string groupname)
+        {
+            var deletedGroup =await _messageRepository.DeleteGroup(groupname);
+
+
+
+            if (deletedGroup !=null)
+            {
+                return deletedGroup;
+            }
+           return null;
+
+        }
+
+
 
         [HttpGet("groups")]
         public async Task<IEnumerable<ChatGroup>> GetGroups()
