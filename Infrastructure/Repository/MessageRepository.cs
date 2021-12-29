@@ -74,6 +74,8 @@ namespace Infrastructure.Repository
             if (group != null)
             {
                 _context.ChatGroups.Remove(group);
+                await _context.SaveChangesAsync();
+
                 return group;
             }
             return null;
