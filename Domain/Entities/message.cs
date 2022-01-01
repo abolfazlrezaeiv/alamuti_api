@@ -13,7 +13,7 @@ namespace Domain.Entities
      
         public string Message { get; set; }
         public string Reciever { get; set; }
-        public DateTime DateSended { get; set; }
+        public DateTime DateSended { get; set; } = DateTime.UtcNow;
         public string GroupName { get; set; }
         public int ChatGroupId { get; set; }
         public ChatGroup ChatGroup { get; set; }

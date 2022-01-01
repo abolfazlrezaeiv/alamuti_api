@@ -19,7 +19,9 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 );
 builder.Services.AddControllers();
 builder.Services.Configure<IISOptions>(builder.Configuration);
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(e => {
+    e.MaximumReceiveMessageSize = 102400000;
+});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(c =>
 {

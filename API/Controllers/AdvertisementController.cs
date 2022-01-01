@@ -112,6 +112,18 @@ namespace API.Controllers
             return await _advertisementRepository.Get(id) ;
         }
 
+        [HttpPut("{id}")]
+        public async Task<Advertisement> ChangeToPublished(int id)
+        {
+            return await _advertisementRepository.ChangeToPublished(id);
+        }
+
+        [HttpDelete("unpublished/{id}")]
+        public async Task<Advertisement> DeleteUnpublished(int id)
+        {
+            return await _advertisementRepository.DeleteUnpublished(id);
+        }
+
         [HttpGet("myalamuti/myAds")]
         public async Task<IEnumerable<AdvertisementDto>> Get()
         {
@@ -130,6 +142,7 @@ namespace API.Controllers
                 adsType = x.AdsType,
                 area = x.Area,
                 UserId = x.UserId,
+                Published = x.Published,
 
 
 
@@ -180,8 +193,10 @@ namespace API.Controllers
             var userId = User.Claims.FirstOrDefault().Value;
             var currentuser = await _userManager.FindByIdAsync(userId);
             var ads = await _advertisementRepository.Get(advertisement.Id);
+
             if (ads.UserId == currentuser.Id)
             {
+                advertisement.Published = false;
                 _advertisementRepository.Update(advertisement);
                 return Ok(advertisement);
             }

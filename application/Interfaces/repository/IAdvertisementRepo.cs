@@ -13,5 +13,10 @@ namespace application.Interfaces.repository
         Task<IEnumerable<Advertisement>> GetCurrentUserAds(IdentityUser user);
         Task<IEnumerable<Advertisement>> Find(string input);
         Task<IEnumerable<Advertisement>> GetAll(string adstype);
+        Task<Advertisement> ChangeToPublished(int id);
+        Task<Advertisement> DeleteUnpublished(int id);
+
+
+
     }
 }
