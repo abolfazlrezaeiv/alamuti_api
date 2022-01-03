@@ -56,15 +56,28 @@ namespace Infrastructure.Repository
 
         public async Task<Advertisement> ChangeToPublished(int id)
         {
-            var ads =  await _context.Advertisements.FindAsync(id);
-            if (ads == null)
+            var advertisement =  await _context.Advertisements.FindAsync(id);
+            if (advertisement == null)
                 return null;
 
-            ads.Published = true;
 
-            _context.SaveChanges();
+            if (await _messageRepository.UpdateGroupIsChecked("alamuti" + advertisement.UserId) != true)
+            {
+                await _messageRepository.AddGroup(new ChatGroup() { Name = "alamuti" + advertisement.UserId, Title = "الموتی", IsChecked = false });
+                await _context.SaveChangesAsync();
+            }
 
-            return ads;
+
+            var group = await _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
+
+            await _context.Messages.AddAsync(new ChatMessage() { ChatGroup = group, ChatGroupId = group.Id, Sender = "الموتی", GroupName = group.Name, Reciever = advertisement.UserId, Message = $"آگهی {advertisement.Title} منتشر شد" });
+
+
+            advertisement.Published = true;
+
+            await _context.SaveChangesAsync();
+
+            return advertisement;
         }
 
 
@@ -85,7 +98,7 @@ namespace Infrastructure.Repository
             }
             
 
-            var group =_context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId).First();
+            var group = await _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
 
             await _context.Messages.AddAsync(new ChatMessage() {ChatGroup = group , ChatGroupId = group.Id , Sender = "الموتی",GroupName = group.Name,Reciever = advertisement.UserId,Message = $"آگهی {advertisement.Title} به یکی از دلایل زیر تایید نشد :\n- مغایرت با قوانین الموتی\n- آگهی تکراری است" });
             await _context.SaveChangesAsync();

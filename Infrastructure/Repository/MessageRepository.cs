@@ -21,7 +21,7 @@ namespace Infrastructure.Repository
 
         public async Task<ChatGroup> AddGroup(ChatGroup group)
         {
-            var availableGroup =   _context.ChatGroups.Where(x=>x.Name == group.Name).ToList();
+            var availableGroup =  await  _context.ChatGroups.Where(x=>x.Name == group.Name).ToListAsync();
             if (availableGroup.Count == 0)
             {
                 await _context.ChatGroups.AddAsync(group);
@@ -41,8 +41,17 @@ namespace Infrastructure.Repository
 
         public async Task<ChatMessage> AddMessageToGroup(string groupName,ChatMessage message)
         {
-            var availableGroup =  _context.ChatGroups.Where(x => x.Name == groupName).First();
-            await _context.Messages.AddAsync(new ChatMessage() { Sender = message.Sender,Message = message.Message,ChatGroup = availableGroup,ChatGroupId= availableGroup.Id,Reciever = message.Reciever,GroupName = groupName,DateSended = message.DateSended   });
+            var availableGroup = await  _context.ChatGroups.Where(x => x.Name == groupName).FirstAsync();
+            await _context.Messages.AddAsync(new ChatMessage() 
+            { 
+                Sender = message.Sender,
+                Message = message.Message,
+                ChatGroup = availableGroup,
+                ChatGroupId= availableGroup.Id,
+                Reciever = message.Reciever,
+                GroupName = groupName,
+                DateSended = message.DateSended
+            });
             await _context.SaveChangesAsync();
             return message;
         }
@@ -63,13 +72,13 @@ namespace Infrastructure.Repository
         public async Task<ChatMessage> GetLastMessageOfGroup (string groupName)
         {
 
-            return  _context.Messages.Where(x => x.GroupName == groupName).OrderBy(x=>x.DateSended).Last();
+            return await _context.Messages.Where(x => x.GroupName == groupName).OrderBy(x=>x.DateSended).LastAsync();
         }
 
         public async Task<ChatGroup> DeleteGroup(string groupName)
         {
 
-            var group =  _context.ChatGroups.Where(x => x.Name == groupName).First();
+            var group = await _context.ChatGroups.Where(x => x.Name == groupName).FirstAsync();
             if (group != null)
             {
                 _context.ChatGroups.Remove(group);
@@ -88,7 +97,9 @@ namespace Infrastructure.Repository
         public async Task<List<ChatGroup>> GetGroupWithMessages(string userId)
         {
             var groups =await _context.ChatGroups.Where(x => x.Name.Contains(userId))
-                     .Include(b => b.Messages.OrderBy(x=>x.DateSended)).OrderByDescending(x=>x.Messages.OrderBy(x=>x.DateSended).Last().DateSended).ToListAsync();
+                     .Include(b => b.Messages.OrderBy(x=>x.DateSended))
+                     .OrderByDescending(x=>x.Messages.OrderBy(x=>x.DateSended).Last().DateSended)
+                     .ToListAsync();
                      
             return groups;
         }
@@ -97,12 +108,12 @@ namespace Infrastructure.Repository
 
         public async Task<bool> UpdateGroupIsChecked(string groupname)
         {
-            var mygroup = await _context.ChatGroups.Where(x => x.Name == groupname).ToListAsync();
+            var group = await _context.ChatGroups.Where(x => x.Name == groupname).FirstAsync();
 
-            var result = mygroup.First(); ;
-            if (result != null)
+           
+            if (group != null)
             {
-                result.IsChecked = false;
+                group.IsChecked = false;
 
                 await _context.SaveChangesAsync();
                 return true;
@@ -112,12 +123,12 @@ namespace Infrastructure.Repository
 
         public async Task<ChatGroup> UpdateGroup(ChatGroup group)
         {
-             var mygroup =  await _context.ChatGroups.Where(x => x.Name == group.Name).ToListAsync();
+             var groupToChange =  await _context.ChatGroups.Where(x => x.Name == group.Name).FirstAsync();
              
-            var result = mygroup.First(); ;
-            if (result != null)
+            
+            if (groupToChange != null)
             {
-                result.IsChecked = group.IsChecked;
+                groupToChange.IsChecked = group.IsChecked;
                
                 await _context.SaveChangesAsync();
             }

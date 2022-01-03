@@ -19,6 +19,7 @@ namespace application.DTOs
         public DateTime DatePosted { get ;  set; }
         public string UserId { get; set; }
         public string AdsType { get; set; }
+        public string PhoneNumber { get; set; }
         public int? Area { get; set; }
         private string persianDateForFlutter;
 

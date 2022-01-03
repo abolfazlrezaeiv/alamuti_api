@@ -46,6 +46,8 @@ namespace API.Controllers
                 DatePosted = x.DatePosted,
                 DaySended = x.DatePosted.ToString(),
                 AdsType = x.AdsType,
+                PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
+                Published = x.Published,
                 Area = x.Area,
                 UserId = x.UserId,
                 
@@ -67,6 +69,8 @@ namespace API.Controllers
                     Description = x.Description,
                     DatePosted = x.DatePosted,
                     DaySended = x.DatePosted.ToString(),
+                    PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
+                    Published = x.Published,
                     AdsType = x.AdsType,
                     Area = x.Area,
                     UserId = x.UserId,
@@ -92,6 +96,8 @@ namespace API.Controllers
                 DatePosted = x.DatePosted,
                 DaySended = x.DatePosted.ToString(),
                 AdsType = x.AdsType,
+                PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
+                Published = x.Published,
                 Area = x.Area,
                 UserId = x.UserId,
 
@@ -117,6 +123,8 @@ namespace API.Controllers
                     DatePosted = x.DatePosted,
                     DaySended = x.DatePosted.ToString(),
                     AdsType = x.AdsType,
+                    PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
+                    Published = x.Published,
                     Area = x.Area,
                     UserId = x.UserId,
                 });
@@ -130,6 +138,8 @@ namespace API.Controllers
                  DatePosted=x.DatePosted,
                  DaySended = x.DatePosted.ToString(),
                  AdsType = x.AdsType,
+                 PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
+                 Published = x.Published,
                  Area = x.Area,
                  UserId = x.UserId,
              });
@@ -151,6 +161,8 @@ namespace API.Controllers
                 DaySended = x.DatePosted.ToString(),
                 AdsType = x.AdsType,
                 Area = x.Area,
+                PhoneNumber =  _userManager.FindByIdAsync(x.UserId).Result.UserName,
+                Published = x.Published,
                 UserId = x.UserId,
             });
         }
@@ -184,8 +196,9 @@ namespace API.Controllers
                 DaySended = x.DatePosted.ToString(),
                 AdsType = x.AdsType,
                 Area = x.Area,
-                UserId = x.UserId,
+                PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
                 Published = x.Published,
+                UserId = x.UserId,
             });
         }
 
