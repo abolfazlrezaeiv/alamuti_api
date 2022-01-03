@@ -18,8 +18,8 @@ namespace application.DTOs
         public byte[] Photo2 { get; set; }
         public DateTime DatePosted { get ;  set; }
         public string UserId { get; set; }
-        public string adsType { get; set; }
-        public int? area { get; set; }
+        public string AdsType { get; set; }
+        public int? Area { get; set; }
         private string persianDateForFlutter;
 
         public string DaySended

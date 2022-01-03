@@ -42,7 +42,6 @@ namespace Infrastructure.Repository
         public async Task<ChatMessage> AddMessageToGroup(string groupName,ChatMessage message)
         {
             var availableGroup =  _context.ChatGroups.Where(x => x.Name == groupName).First();
-            //availableGroup.Messages.Add(message);
             await _context.Messages.AddAsync(new ChatMessage() { Sender = message.Sender,Message = message.Message,ChatGroup = availableGroup,ChatGroupId= availableGroup.Id,Reciever = message.Reciever,GroupName = groupName,DateSended = message.DateSended   });
             await _context.SaveChangesAsync();
             return message;
@@ -81,20 +80,35 @@ namespace Infrastructure.Repository
             return null;
         }
 
-        public  async Task<IEnumerable<ChatGroup>> GetAllGroup()
+        public  async Task<IEnumerable<ChatGroup>> GetAllGroup(string userId)
         {
-            return await _context.ChatGroups.ToListAsync();
+            return await _context.ChatGroups.Where(x => x.Name.Contains(userId)).ToListAsync();
 
         }
-        public async Task<List<ChatGroup>> GetGroupWithMessages()
+        public async Task<List<ChatGroup>> GetGroupWithMessages(string userId)
         {
-            var groups =await _context.ChatGroups
+            var groups =await _context.ChatGroups.Where(x => x.Name.Contains(userId))
                      .Include(b => b.Messages.OrderBy(x=>x.DateSended)).OrderByDescending(x=>x.Messages.OrderBy(x=>x.DateSended).Last().DateSended).ToListAsync();
                      
             return groups;
         }
 
 
+
+        public async Task<bool> UpdateGroupIsChecked(string groupname)
+        {
+            var mygroup = await _context.ChatGroups.Where(x => x.Name == groupname).ToListAsync();
+
+            var result = mygroup.First(); ;
+            if (result != null)
+            {
+                result.IsChecked = false;
+
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
 
         public async Task<ChatGroup> UpdateGroup(ChatGroup group)
         {

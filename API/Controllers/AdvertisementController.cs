@@ -45,11 +45,59 @@ namespace API.Controllers
                 Description = x.Description,
                 DatePosted = x.DatePosted,
                 DaySended = x.DatePosted.ToString(),
-                adsType = x.AdsType,
-                area = x.Area,
+                AdsType = x.AdsType,
+                Area = x.Area,
                 UserId = x.UserId,
                 
             });
+        }
+
+        [HttpGet("getUnpublished")]
+        public async Task<IEnumerable<AdvertisementDto>> GetAllUnPublished()
+        {
+
+         
+                return  _advertisementRepository.GetAllUnpublished().Result.Select(x => new AdvertisementDto
+                {
+                    Title = x.Title,
+                    Id = x.Id,
+                    Price = x.Price,
+                    Photo1 = x.photo1,
+                    Photo2 = x.photo2,
+                    Description = x.Description,
+                    DatePosted = x.DatePosted,
+                    DaySended = x.DatePosted.ToString(),
+                    AdsType = x.AdsType,
+                    Area = x.Area,
+                    UserId = x.UserId,
+
+                });
+         
+          
+        }
+
+        [HttpGet("getUnpublishedUserAds/{userid}")]
+        public async Task<IEnumerable<AdvertisementDto>> GetUnpublishedUserAds(string userId)
+        {
+
+
+            return _advertisementRepository.GetUnpublishedUserAds(userId).Result.Select(x => new AdvertisementDto
+            {
+                Title = x.Title,
+                Id = x.Id,
+                Price = x.Price,
+                Photo1 = x.photo1,
+                Photo2 = x.photo2,
+                Description = x.Description,
+                DatePosted = x.DatePosted,
+                DaySended = x.DatePosted.ToString(),
+                AdsType = x.AdsType,
+                Area = x.Area,
+                UserId = x.UserId,
+
+            });
+
+
         }
 
         [HttpGet("filter/{adstype}")]
@@ -68,8 +116,8 @@ namespace API.Controllers
                     Description = x.Description,
                     DatePosted = x.DatePosted,
                     DaySended = x.DatePosted.ToString(),
-                    adsType = x.AdsType,
-                    area = x.Area,
+                    AdsType = x.AdsType,
+                    Area = x.Area,
                     UserId = x.UserId,
                 });
             }
@@ -81,15 +129,17 @@ namespace API.Controllers
                  Description=x.Description,
                  DatePosted=x.DatePosted,
                  DaySended = x.DatePosted.ToString(),
-                 adsType = x.AdsType,
-                 area = x.Area,
+                 AdsType = x.AdsType,
+                 Area = x.Area,
                  UserId = x.UserId,
              });
         }
-        [HttpGet("find/{input}")]
+        [HttpGet("search/{input}")]
         public async Task<IEnumerable<AdvertisementDto>> Search(string input)
         {
-            return _advertisementRepository.Find(input).Result.Select(x => new AdvertisementDto
+            var searchResult = await _advertisementRepository.Find(input);
+
+            return searchResult.Select(x => new AdvertisementDto
             {
                 Title = x.Title,
                 Id = x.Id,
@@ -99,37 +149,30 @@ namespace API.Controllers
                 Description = x.Description,
                 DatePosted = x.DatePosted,
                 DaySended = x.DatePosted.ToString(),
-                adsType = x.AdsType,
-                area = x.Area,
+                AdsType = x.AdsType,
+                Area = x.Area,
                 UserId = x.UserId,
             });
         }
 
 
         [HttpGet("{id}")]
-        public async Task<Advertisement> Get(int id)
-        {
-            return await _advertisementRepository.Get(id) ;
-        }
+        public async Task<Advertisement> Get(int id) => await _advertisementRepository.Get(id);
 
-        [HttpPut("{id}")]
-        public async Task<Advertisement> ChangeToPublished(int id)
-        {
-            return await _advertisementRepository.ChangeToPublished(id);
-        }
 
-        [HttpDelete("unpublished/{id}")]
-        public async Task<Advertisement> DeleteUnpublished(int id)
-        {
-            return await _advertisementRepository.DeleteUnpublished(id);
-        }
+        [HttpPut("changeToPublished/{id}")]
+        public async Task<Advertisement> ChangeToPublished(int id) => await _advertisementRepository.ChangeToPublished(id);
+
+
+        [HttpDelete("unPublished/{id}")]
+        public async Task<Advertisement> DeleteUnpublished(int id) => await _advertisementRepository.DeleteUnpublished(id);
+
 
         [HttpGet("myalamuti/myAds")]
         public async Task<IEnumerable<AdvertisementDto>> Get()
         {
-            var userId = User.Claims.FirstOrDefault().Value;
-            var currentuser = await _userManager.FindByIdAsync(userId);
-            return  _advertisementRepository.GetCurrentUserAds(currentuser).Result.Select(x => new AdvertisementDto
+            var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
+            return _advertisementRepository.GetCurrentUserAds(currentuser).Result.Select(x => new AdvertisementDto
             {
                 Title = x.Title,
                 Id = x.Id,
@@ -139,49 +182,20 @@ namespace API.Controllers
                 Description = x.Description,
                 DatePosted = x.DatePosted,
                 DaySended = x.DatePosted.ToString(),
-                adsType = x.AdsType,
-                area = x.Area,
+                AdsType = x.AdsType,
+                Area = x.Area,
                 UserId = x.UserId,
                 Published = x.Published,
-
-
-
             });
         }
 
         [HttpPost]
-        public  async Task<Advertisement> Post([FromForm] Advertisement  advertisement)
+        public async Task<Advertisement> Post([FromForm] Advertisement advertisement)
         {
-            var userId = User.Claims.FirstOrDefault().Value;
-            var currentuser = await _userManager.FindByIdAsync(userId);
-            //8c2b9c88 - 3c8b - 4d41 - b7dc - 399c8e66a643
-            //var username2 = User.Claims.FirstOrDefault();
-            //var userId = User.FindFirstValue(ClaimTypes.Name);
-            //var userId2 = this.User.FindFirstValue(ClaimTypes.Uri);
-            //var userId3 = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
-            //var userId4 = this.User.FindFirstValue(ClaimTypes.Name);
+            var userId = User.Claims.FirstOrDefault()?.Value;
 
-            //var user = await _userManager.FindByNameAsync(userId);
-            advertisement.UserId = currentuser.Id;
+            advertisement.UserId = userId;
 
-
-            //foreach (var file in Request.Form.Files)
-            //{
-            //    Image img = new Image();
-            //    img.ImageTitle = file.FileName;
-            //    MemoryStream ms = new MemoryStream();
-            //    file.CopyTo(ms);
-            //    if (advertisement.photo1 == null)
-            //    {
-            //        advertisement.photo1 = ms.ToArray();
-            //    }
-            //    if (advertisement.photo2== null)
-            //    {
-            //        advertisement.photo2 = ms.ToArray();
-            //    }
-            //    ms.Close();
-            //    ms.Dispose();
-            //}
             return await _advertisementRepository.Add(advertisement);
         }
 
@@ -189,31 +203,29 @@ namespace API.Controllers
         [HttpPut]
         public async Task<IActionResult> Put([FromForm] Advertisement advertisement)
         {
-     
-            var userId = User.Claims.FirstOrDefault().Value;
-            var currentuser = await _userManager.FindByIdAsync(userId);
+
+            var userId = User.Claims.FirstOrDefault()?.Value;
             var ads = await _advertisementRepository.Get(advertisement.Id);
 
-            if (ads.UserId == currentuser.Id)
+            if (ads.UserId != userId)
             {
-                advertisement.Published = false;
-                _advertisementRepository.Update(advertisement);
-                return Ok(advertisement);
+                return NotFound();
             }
-            return NotFound();
+            await _advertisementRepository.Update(advertisement);
+            return Ok(advertisement);
 
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userId = User.Claims.FirstOrDefault().Value;
-            var currentuser = await _userManager.FindByIdAsync(userId);
+            var userId = User.Claims.FirstOrDefault()?.Value;
+            //var currentuser = await _userManager.FindByIdAsync(userId);
             var ads = await _advertisementRepository.Get(id);
-            if (ads.UserId == currentuser.Id)
+            if (ads.UserId == userId)
             {
                 await _advertisementRepository.Delete(ads);
-                return Ok();
+                return Ok(ads);
             }
             return NotFound();
             

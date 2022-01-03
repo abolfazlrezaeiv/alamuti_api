@@ -37,7 +37,8 @@ namespace API.Controllers
         [HttpGet("massages/{groupname}")]
         public async Task<IEnumerable<ChatMessageDto>> Get(string groupname)
         {
-            return  _messageRepository.GetMessages(groupname).Result.Select(x=>new ChatMessageDto() 
+            var messages = await _messageRepository.GetMessages(groupname);
+            return messages.Select(x=>new ChatMessageDto() 
             { 
                 Sender = x.Sender,
                 Reciever = x.Reciever,
@@ -46,44 +47,39 @@ namespace API.Controllers
                 GroupName = groupname,
                 Message = x.Message,
                 DaySended = x.DateSended.ToString()
-
             });
 
         }
 
         [HttpDelete("group/{groupname}")]
-        public async Task<ChatGroup> DeleteGroup(string groupname)
+        public async Task<IActionResult> DeleteGroup(string groupname)
         {
-            var deletedGroup =await _messageRepository.DeleteGroup(groupname);
+            var deletedGroup = Ok(await _messageRepository.DeleteGroup(groupname));
 
-
-
-            if (deletedGroup !=null)
+            if (deletedGroup != null)
             {
-                return deletedGroup;
+                return Ok(deletedGroup);
             }
-           return null;
-
+            return NotFound();
         }
 
 
 
         [HttpGet("groups")]
-        public async Task<IEnumerable<ChatGroup>> GetGroups()
+        public async Task<IActionResult> GetGroups()
         {
-            var userId = User.Claims.FirstOrDefault().Value;
-            var currentuser = await _userManager.FindByIdAsync(userId);
-            return  _messageRepository.GetAllGroup().Result.Where(x=>x.Name.Contains(currentuser.Id)) ;
-
+            var userId = User.Claims.FirstOrDefault()?.Value;
+            return Ok(await _messageRepository.GetAllGroup(userId));
+           
         }
 
         [HttpGet("groupswithmessages")]
-        public async Task<IEnumerable<ChatGroupDto>> GetGroupsWithMessages()
+        public async Task<IActionResult> GetGroupsWithMessages()
         {
-            var userId = User.Claims.FirstOrDefault().Value;
-            var currentuser = await _userManager.FindByIdAsync(userId);
-            return _messageRepository.GetGroupWithMessages().Result.Where(x => x.Name.Contains(currentuser.Id))
-                .Select(group=>new ChatGroupDto()
+            var userId = User.Claims.FirstOrDefault()?.Value;
+            var groups = await _messageRepository.GetGroupWithMessages(userId);
+           
+            var result = groups.Select(group=>new ChatGroupDto()
                 {Name = group.Name,
                 Id = group.Id,
                 IsChecked = group.IsChecked,
@@ -100,51 +96,30 @@ namespace API.Controllers
                         Reciever = group.Messages.Last().Reciever,
                         Sender = group.Messages.Last().Sender,
                     }
-                });
+            });
+           
+            return Ok(result);
         }
 
 
-
-        //[HttpPost("/addMessageToGroup")]
-        //public async Task<ChatMessage> Post([FromBody] ChatMessage chatMessage)
-        //{
-
-
-        //   await _messageRepository. Add(chatMessage);
-        //    return chatMessage;
-
-
-        //}
-        
-        
-
         [HttpPost("addgroup")]
-        public async Task<ChatGroup> Post([FromForm] ChatGroup group)
+        public async Task<IActionResult> Post([FromForm] ChatGroup group)
         {
-
-
-            await _messageRepository.AddGroup(group);
-            return group;
-
-
+            return Ok(await _messageRepository.AddGroup(group));
+            
         }
 
         [HttpPut]
-        public async Task<ChatGroup> put([FromForm] ChatGroup group)
+        public async Task<IActionResult> Put([FromForm] ChatGroup group)
         {
-
-
-            await _messageRepository.UpdateGroup(group);
-            return group;
-
-
+            return Ok(await _messageRepository.UpdateGroup(group)); 
         }
 
 
         [HttpGet("groups/{groupname}")]
-        public async Task<ChatMessage> GetLastMessage( string groupname )
+        public async Task<IActionResult> GetLastMessage( string groupname )
         {
-            return await _messageRepository.GetLastMessageOfGroup(groupname);
+            return Ok(await _messageRepository.GetLastMessageOfGroup(groupname));
 
         }
 
@@ -152,14 +127,8 @@ namespace API.Controllers
         [HttpPost()]
         public async Task<ChatMessage> Post([FromBody] ChatMessage message)
         {
-
-
-            await _messageRepository.Add(message);
+            Ok(await _messageRepository.Add(message));
             return message;
-
-
         }
-
-
     }
 }
