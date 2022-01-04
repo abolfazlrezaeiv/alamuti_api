@@ -56,7 +56,7 @@ namespace Infrastructure.Repository
 
         public async Task<Advertisement> ChangeToPublished(int id)
         {
-            var advertisement =  await _context.Advertisements.FindAsync(id);
+            var advertisement = await  _context.Advertisements.FindAsync(id);
             if (advertisement == null)
                 return null;
 
@@ -64,7 +64,6 @@ namespace Infrastructure.Repository
             if (await _messageRepository.UpdateGroupIsChecked("alamuti" + advertisement.UserId) != true)
             {
                 await _messageRepository.AddGroup(new ChatGroup() { Name = "alamuti" + advertisement.UserId, Title = "الموتی", IsChecked = false });
-                await _context.SaveChangesAsync();
             }
 
 
@@ -116,10 +115,13 @@ namespace Infrastructure.Repository
             return await _context.Advertisements.Where(x => x.UserId == userId && x.Published == true).ToListAsync();
         }
 
-        public async Task<IEnumerable<Advertisement>> Find(string input)
+        public async Task<IEnumerable<Advertisement>> Search(string input)
         {
+            var searchResult =  await _context.Advertisements
+                .Where(x => x.Title.Contains(input)&& x.Published == true)
+                .ToListAsync();
 
-            return await _context.Advertisements.Where(x => x.Title.Contains(input)&& x.Published == true).ToListAsync();
+            return searchResult;
         }
 
 

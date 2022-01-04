@@ -145,26 +145,31 @@ namespace API.Controllers
              });
         }
         [HttpGet("search/{input}")]
-        public async Task<IEnumerable<AdvertisementDto>> Search(string input)
+        public async Task<IActionResult> Search(string input)
         {
-            var searchResult = await _advertisementRepository.Find(input);
+            var searchResult = await _advertisementRepository.Search(input);
 
-            return searchResult.Select(x => new AdvertisementDto
-            {
-                Title = x.Title,
-                Id = x.Id,
-                Price = x.Price,
-                Photo1 = x.photo1,
-                Photo2 = x.photo2,
-                Description = x.Description,
-                DatePosted = x.DatePosted,
-                DaySended = x.DatePosted.ToString(),
-                AdsType = x.AdsType,
-                Area = x.Area,
-                PhoneNumber =  _userManager.FindByIdAsync(x.UserId).Result.UserName,
-                Published = x.Published,
-                UserId = x.UserId,
-            });
+         
+                return Ok(searchResult.Select(x => new AdvertisementDto
+                {
+                    Title = x.Title,
+                    Id = x.Id,
+                    Price = x.Price,
+                    Photo1 = x.photo1,
+                    Photo2 = x.photo2,
+                    Description = x.Description,
+                    DatePosted = x.DatePosted,
+                    DaySended = x.DatePosted.ToString(),
+                    AdsType = x.AdsType,
+                    Area = x.Area,
+                    PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
+                    Published = x.Published,
+                    UserId = x.UserId,
+                }));
+       
+
+          
+           
         }
 
 

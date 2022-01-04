@@ -108,12 +108,12 @@ namespace Infrastructure.Repository
 
         public async Task<bool> UpdateGroupIsChecked(string groupname)
         {
-            var group = await _context.ChatGroups.Where(x => x.Name == groupname).FirstAsync();
+            var group = await _context.ChatGroups.Where(x => x.Name == groupname).ToListAsync();
 
            
-            if (group != null)
+            if (group.Count != 0)
             {
-                group.IsChecked = false;
+                group.First().IsChecked = false;
 
                 await _context.SaveChangesAsync();
                 return true;

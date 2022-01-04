@@ -11,7 +11,7 @@ namespace application.Interfaces.repository
     public interface IAdvertisementRepository : IRepository<Advertisement>
     {
         Task<IEnumerable<Advertisement>> GetCurrentUserAds(IdentityUser user);
-        Task<IEnumerable<Advertisement>> Find(string input);
+        Task<IEnumerable<Advertisement>> Search(string input);
         Task<IEnumerable<Advertisement>> GetAll(string adstype);
         Task<IEnumerable<Advertisement>> GetAllUnpublished();
         Task<Advertisement> ChangeToPublished(int id);
