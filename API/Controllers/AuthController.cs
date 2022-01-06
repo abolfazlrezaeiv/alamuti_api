@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using RestSharp;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -56,7 +57,19 @@ namespace API.Controllers
 
                 var sms = new Ghasedak.Core.Api("47541ce5eed0c53032beda134b59199b7d7da859ef6c9c25de5b06f7a9de0798");
 
-                await sms.SendSMSAsync($"کد عضویت شما {generatedNumber} می باشد ", "09904640760", "10008566");
+                var userphoneNumber = user.PhoneNumber;
+
+                //await sms.SendSMSAsync($"کد فعالسازی {generatedNumber} می باشد\n الموتی ", userphoneNumber, "10008566");
+                var client = new RestClient("https://api.ghasedak.me/v2/verification/send/simple");
+                var request = new RestRequest(Method.POST);
+                request.AddHeader("apikey", "47541ce5eed0c53032beda134b59199b7d7da859ef6c9c25de5b06f7a9de0798");
+                request.AddParameter("receptor", $"{userphoneNumber}");
+                request.AddParameter("type", 1);
+                request.AddParameter("template", "alamut2");
+                request.AddParameter("param1", $"{generatedNumber}"); 
+             
+               
+                IRestResponse response = client.Execute(request);
 
                 if (existingUser != null)
                 {
