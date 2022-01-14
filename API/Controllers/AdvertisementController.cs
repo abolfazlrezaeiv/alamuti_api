@@ -1,12 +1,12 @@
 ﻿using application.DTOs;
-using application.Interfaces.Data;
+using application.DTOs.Advertisement;
 using application.Interfaces.repository;
 using Domain.Entities;
-using Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Security.Claims;
 
 namespace API.Controllers
@@ -30,12 +30,14 @@ namespace API.Controllers
             _userManager = userManager; 
         }
 
-        [HttpGet()]
-        public async Task<IEnumerable<AdvertisementDto>> GetAll()
-        {
-   
 
-            return _advertisementRepository.GetAll().Result.Select(x => new AdvertisementDto
+        [HttpGet("getUnpublished")]
+        public async Task<IEnumerable<AdvertisementDto>> GetAllUnPublished()
+        {
+
+
+            var result = await _advertisementRepository.GetAllUnpublished();
+            return  result.Select(x => new AdvertisementDto 
             {
                 Title = x.Title,
                 Id = x.Id,
@@ -45,37 +47,14 @@ namespace API.Controllers
                 Description = x.Description,
                 DatePosted = x.DatePosted,
                 DaySended = x.DatePosted.ToString(),
-                AdsType = x.AdsType,
                 PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
                 Published = x.Published,
+                AdsType = x.AdsType,
                 Area = x.Area,
                 UserId = x.UserId,
-                
+                Village = x.Village,
+
             });
-        }
-
-        [HttpGet("getUnpublished")]
-        public async Task<IEnumerable<AdvertisementDto>> GetAllUnPublished()
-        {
-
-         
-                return  _advertisementRepository.GetAllUnpublished().Result.Select(x => new AdvertisementDto
-                {
-                    Title = x.Title,
-                    Id = x.Id,
-                    Price = x.Price,
-                    Photo1 = x.photo1,
-                    Photo2 = x.photo2,
-                    Description = x.Description,
-                    DatePosted = x.DatePosted,
-                    DaySended = x.DatePosted.ToString(),
-                    PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
-                    Published = x.Published,
-                    AdsType = x.AdsType,
-                    Area = x.Area,
-                    UserId = x.UserId,
-
-                });
          
           
         }
@@ -85,7 +64,8 @@ namespace API.Controllers
         {
 
 
-            return _advertisementRepository.GetUnpublishedUserAds(userId).Result.Select(x => new AdvertisementDto
+            var result = await _advertisementRepository.GetUnpublishedUserAds(userId);
+            return result.Select(x => new AdvertisementDto
             {
                 Title = x.Title,
                 Id = x.Id,
@@ -100,6 +80,7 @@ namespace API.Controllers
                 Published = x.Published,
                 Area = x.Area,
                 UserId = x.UserId,
+                Village = x.Village,
 
             });
 
@@ -107,12 +88,25 @@ namespace API.Controllers
         }
 
         [HttpGet("filter/{adstype}")]
-        public async Task<IEnumerable<AdvertisementDto>> Get(string? adstype)
+        public async Task<IEnumerable<AdvertisementDto>> GetAll([FromQuery] AdvertisementParameters advertisementParameters, string? adstype)
         {
-   
-            if (adstype != null)
+            IEnumerable<AdvertisementDto> result;
+            object metadata;
+            if (string.IsNullOrWhiteSpace(adstype))
             {
-                return _advertisementRepository.GetAll(adstype).Result.Select(x => new AdvertisementDto
+                var allAdvertisement = await _advertisementRepository.GetAll(advertisementParameters);
+
+                 metadata = new
+                {
+                    allAdvertisement.TotalCount,
+                    allAdvertisement.PageSize,
+                    allAdvertisement.CurrentPage,
+                    allAdvertisement.TotalPages,
+                    allAdvertisement.HasNext,
+                    allAdvertisement.HasPrevious
+                };
+
+                result = allAdvertisement.Select(x => new AdvertisementDto
                 {
                     Title = x.Title,
                     Id = x.Id,
@@ -127,22 +121,47 @@ namespace API.Controllers
                     Published = x.Published,
                     Area = x.Area,
                     UserId = x.UserId,
+                    Village = x.Village,
                 });
             }
-             return  _advertisementRepository.GetAll().Result.Select(x=> new AdvertisementDto { 
-                 Title = x.Title,Id = x.Id,
-                 Price= x.Price,
-                 Photo1=x.photo1,
-                 Photo2=x.photo2,
-                 Description=x.Description,
-                 DatePosted=x.DatePosted,
-                 DaySended = x.DatePosted.ToString(),
-                 AdsType = x.AdsType,
-                 PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
-                 Published = x.Published,
-                 Area = x.Area,
-                 UserId = x.UserId,
-             });
+            else
+            {
+                var filteredResult = await _advertisementRepository.GetAll(adstype, advertisementParameters);
+
+                metadata = new
+                {
+                    filteredResult.TotalCount,
+                    filteredResult.PageSize,
+                    filteredResult.CurrentPage,
+                    filteredResult.TotalPages,
+                    filteredResult.HasNext,
+                    filteredResult.HasPrevious
+                };
+
+                result = filteredResult.Select(x => new AdvertisementDto
+                {
+                    Title = x.Title,
+                    Id = x.Id,
+                    Price = x.Price,
+                    Photo1 = x.photo1,
+                    Photo2 = x.photo2,
+                    Description = x.Description,
+                    DatePosted = x.DatePosted,
+                    DaySended = x.DatePosted.ToString(),
+                    AdsType = x.AdsType,
+                    PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
+                    Published = x.Published,
+                    Area = x.Area,
+                    UserId = x.UserId,
+                    Village = x.Village,
+                });
+            }
+
+          
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            return result;
+         
         }
         [HttpGet("search/{input}")]
         public async Task<IActionResult> Search(string input)
@@ -165,6 +184,7 @@ namespace API.Controllers
                     PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
                     Published = x.Published,
                     UserId = x.UserId,
+                    Village = x.Village,
                 }));
        
 
@@ -189,7 +209,8 @@ namespace API.Controllers
         public async Task<IEnumerable<AdvertisementDto>> Get()
         {
             var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
-            return _advertisementRepository.GetCurrentUserAds(currentuser).Result.Select(x => new AdvertisementDto
+            var myAds = await _advertisementRepository.GetCurrentUserAds(currentuser);
+            return myAds.Select(x => new AdvertisementDto
             {
                 Title = x.Title,
                 Id = x.Id,
@@ -204,6 +225,7 @@ namespace API.Controllers
                 PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
                 Published = x.Published,
                 UserId = x.UserId,
+                Village = x.Village,
             });
         }
 
@@ -238,7 +260,6 @@ namespace API.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
-            //var currentuser = await _userManager.FindByIdAsync(userId);
             var ads = await _advertisementRepository.Get(id);
             if (ads.UserId == userId)
             {

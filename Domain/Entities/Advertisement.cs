@@ -15,7 +15,9 @@ namespace Domain.Entities
         public byte[] photo2 { get; set; }
         public DateTime DatePosted { get; set; } = DateTime.UtcNow ;
         public string UserId { get; set; }
-        public bool Published { get; set; } = false; 
+        public bool Published { get; set; } = false;
+
+        public string Village { get; set; }
         public int? Area { get; set; }
 
 

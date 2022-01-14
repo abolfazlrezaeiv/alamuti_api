@@ -1,15 +1,12 @@
-﻿using application.DTOs.Requests;
-using application.Interfaces.Data;
+﻿using application.DTOs;
+using application.DTOs.Advertisement;
 using application.Interfaces.repository;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Repository
@@ -107,41 +104,54 @@ namespace Infrastructure.Repository
 
         public async Task<IEnumerable<Advertisement>> GetCurrentUserAds(IdentityUser user)
         {
-            return await _context.Advertisements.Where(x=>x.UserId == user.Id).ToListAsync();
+            return await _context.Advertisements.Where(x=>x.UserId == user.Id).AsNoTracking().ToListAsync();
         }
 
         public async Task<IEnumerable<Advertisement>> GetUnpublishedUserAds(string userId)
         {
-            return await _context.Advertisements.Where(x => x.UserId == userId && x.Published == true).ToListAsync();
+            return await _context.Advertisements.Where(x => x.UserId == userId && x.Published == true).AsNoTracking().ToListAsync();
         }
 
         public async Task<IEnumerable<Advertisement>> Search(string input)
         {
             var searchResult =  await _context.Advertisements
-                .Where(x => x.Title.Contains(input)&& x.Published == true)
+                .Where(x => (x.Title.Contains(input) || x.Village.Contains(input))  && x.Published == true).AsNoTracking()
                 .ToListAsync();
 
             return searchResult;
         }
 
 
-        public async Task<IEnumerable<Advertisement>> GetAll(string adsType)
+        public async Task<PagedList<Advertisement>> GetAll(string adsType, AdvertisementParameters advertisementParameters)
         {
-
-            return await _context.Advertisements.Where(x=>x.AdsType == adsType && x.Published == true).ToListAsync();
+            return PagedList<Advertisement>
+                .ToPagedList( _context.Advertisements.Where(x => x.AdsType == adsType && x.Published == true)
+                .OrderByDescending(x => x.DatePosted).AsNoTracking(),
+                advertisementParameters.PageNumber,
+                advertisementParameters.PageSize);
+            //return await _context.Advertisements.Where(x => x.AdsType == adsType && x.Published == true)
+            //    .OrderByDescending(x => x.DatePosted)
+            //    .Skip((advertisementParameters.PageNumber - 1) * advertisementParameters.PageSize)
+            //    .Take(advertisementParameters.PageSize)
+            //    .AsNoTracking();
+                
         }
 
 
-        public async Task<IEnumerable<Advertisement>> GetAll()
+        public async Task<PagedList<Advertisement>> GetAll(AdvertisementParameters advertisementParameters)
         {
 
-            return await _context.Advertisements.Where(x=>x.Published == true).ToListAsync();
+            return PagedList<Advertisement>
+               .ToPagedList(_context.Advertisements.Where(x => x.Published == true)
+               .OrderByDescending(x => x.DatePosted).AsNoTracking(),
+               advertisementParameters.PageNumber,
+               advertisementParameters.PageSize);
         }
 
         public async Task<IEnumerable<Advertisement>> GetAllUnpublished()
         {
 
-            return await _context.Advertisements.Where(x => x.Published == false).ToListAsync();
+            return await _context.Advertisements.Where(x => x.Published == false).AsNoTracking().ToListAsync();
         }
 
 
@@ -163,6 +173,14 @@ namespace Infrastructure.Repository
             }
          
             return advertisement;
+        }
+
+        public async Task<IEnumerable<Advertisement>> GetAll()
+        {
+            return await _context.Advertisements.Where(x => x.Published == true)
+                .OrderByDescending(x => x.DatePosted)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

@@ -20,6 +20,7 @@ namespace application.DTOs
         public string UserId { get; set; }
         public string AdsType { get; set; }
         public string PhoneNumber { get; set; }
+        public string Village { get; set; }
         public int? Area { get; set; }
         private string persianDateForFlutter;
 

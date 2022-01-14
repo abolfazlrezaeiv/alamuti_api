@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AlamutDbContext))]
-    partial class AlamutDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220109122005_addvillageField")]
+    partial class addvillageField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,14 +56,14 @@ namespace Infrastructure.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Village")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("photo1")
                         .HasColumnType("varbinary(max)");
 
                     b.Property<byte[]>("photo2")
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("village")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
