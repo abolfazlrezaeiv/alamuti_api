@@ -32,18 +32,30 @@ namespace API.Controllers
 
 
         [HttpGet("getUnpublished")]
-        public async Task<IEnumerable<AdvertisementDto>> GetAllUnPublished()
+        public async Task<IEnumerable<AdvertisementDto>> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
         {
 
 
-            var result = await _advertisementRepository.GetAllUnpublished();
+            var result =  _advertisementRepository.GetAllUnpublished(advertisementParameters);
+
+            var metadata = new
+            {
+                result.TotalCount,
+                result.PageSize,
+                result.CurrentPage,
+                result.TotalPages,
+                result.HasNext,
+                result.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
             return  result.Select(x => new AdvertisementDto 
             {
                 Title = x.Title,
                 Id = x.Id,
                 Price = x.Price,
-                Photo1 = x.photo1,
-                Photo2 = x.photo2,
+                listviewPhoto = x.listviewPhoto,
                 Description = x.Description,
                 DatePosted = x.DatePosted,
                 DaySended = x.DatePosted.ToString(),
@@ -59,19 +71,32 @@ namespace API.Controllers
           
         }
 
-        [HttpGet("getUnpublishedUserAds/{userid}")]
-        public async Task<IEnumerable<AdvertisementDto>> GetUnpublishedUserAds(string userId)
+        [HttpGet("GetUserAdvertisementInAdminPandel/{userid}")]
+        public async Task<IEnumerable<AdvertisementDto>> GetUserAdvertisementInAdminPandel(string userId
+            , [FromQuery] AdvertisementParameters advertisementParameters)
         {
 
 
-            var result = await _advertisementRepository.GetUnpublishedUserAds(userId);
+            var result =  _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
+
+            var metadata = new
+            {
+                result.TotalCount,
+                result.PageSize,
+                result.CurrentPage,
+                result.TotalPages,
+                result.HasNext,
+                result.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
             return result.Select(x => new AdvertisementDto
             {
                 Title = x.Title,
                 Id = x.Id,
                 Price = x.Price,
-                Photo1 = x.photo1,
-                Photo2 = x.photo2,
+                listviewPhoto = x.listviewPhoto,    
                 Description = x.Description,
                 DatePosted = x.DatePosted,
                 DaySended = x.DatePosted.ToString(),
@@ -88,13 +113,13 @@ namespace API.Controllers
         }
 
         [HttpGet("filter/{adstype}")]
-        public async Task<IEnumerable<AdvertisementDto>> GetAll([FromQuery] AdvertisementParameters advertisementParameters, string? adstype)
+        public IEnumerable<AdvertisementDto> GetAll([FromQuery] AdvertisementParameters advertisementParameters, string? adstype)
         {
             IEnumerable<AdvertisementDto> result;
             object metadata;
             if (string.IsNullOrWhiteSpace(adstype))
             {
-                var allAdvertisement = await _advertisementRepository.GetAll(advertisementParameters);
+                var allAdvertisement =  _advertisementRepository.GetAll(advertisementParameters);
 
                  metadata = new
                 {
@@ -111,8 +136,7 @@ namespace API.Controllers
                     Title = x.Title,
                     Id = x.Id,
                     Price = x.Price,
-                    Photo1 = x.photo1,
-                    Photo2 = x.photo2,
+                    listviewPhoto = x.listviewPhoto,
                     Description = x.Description,
                     DatePosted = x.DatePosted,
                     DaySended = x.DatePosted.ToString(),
@@ -126,7 +150,7 @@ namespace API.Controllers
             }
             else
             {
-                var filteredResult = await _advertisementRepository.GetAll(adstype, advertisementParameters);
+                var filteredResult =  _advertisementRepository.GetAll(adstype, advertisementParameters);
 
                 metadata = new
                 {
@@ -142,9 +166,8 @@ namespace API.Controllers
                 {
                     Title = x.Title,
                     Id = x.Id,
-                    Price = x.Price,
-                    Photo1 = x.photo1,
-                    Photo2 = x.photo2,
+                    Price = x.Price,     
+                    listviewPhoto = x.listviewPhoto,
                     Description = x.Description,
                     DatePosted = x.DatePosted,
                     DaySended = x.DatePosted.ToString(),
@@ -164,18 +187,28 @@ namespace API.Controllers
          
         }
         [HttpGet("search/{input}")]
-        public async Task<IActionResult> Search(string input)
+        public IActionResult Search(string input, [FromQuery] AdvertisementParameters advertisementParameters)
         {
-            var searchResult = await _advertisementRepository.Search(input);
+            var searchResult =  _advertisementRepository.Search(input, advertisementParameters);
 
-         
-                return Ok(searchResult.Select(x => new AdvertisementDto
+            var metadata = new
+            {
+                searchResult.TotalCount,
+                searchResult.PageSize,
+                searchResult.CurrentPage,
+                searchResult.TotalPages,
+                searchResult.HasNext,
+                searchResult.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            return Ok(searchResult.Select(x => new AdvertisementDto
                 {
                     Title = x.Title,
                     Id = x.Id,
                     Price = x.Price,
-                    Photo1 = x.photo1,
-                    Photo2 = x.photo2,
+                  listviewPhoto = x.listviewPhoto,
                     Description = x.Description,
                     DatePosted = x.DatePosted,
                     DaySended = x.DatePosted.ToString(),
@@ -194,7 +227,27 @@ namespace API.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<Advertisement> Get(int id) => await _advertisementRepository.Get(id);
+        public async Task<AdvertisementDto> Get(int id) {
+            var result = await _advertisementRepository.Get(id);
+            return new AdvertisementDto
+            {
+                Title = result.Title,
+                Id = result.Id,
+                Price = result.Price,
+                Photo1 = result.photo1,
+                Photo2 = result.photo2,
+                Description = result.Description,
+                DatePosted = result.DatePosted,
+                DaySended = result.DatePosted.ToString(),
+                AdsType = result.AdsType,
+                Area = result.Area,
+                PhoneNumber = _userManager.FindByIdAsync(result.UserId).Result.UserName,
+                Published = result.Published,
+                UserId = result.UserId,
+                Village = result.Village,
+            };
+
+        }
 
 
         [HttpPut("changeToPublished/{id}")]
@@ -209,14 +262,14 @@ namespace API.Controllers
         public async Task<IEnumerable<AdvertisementDto>> Get()
         {
             var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
-            var myAds = await _advertisementRepository.GetCurrentUserAds(currentuser);
-            return myAds.Select(x => new AdvertisementDto
+            var userAds = await  _advertisementRepository.GetCurrentUserAds(currentuser);
+
+            return userAds.Select(x => new AdvertisementDto
             {
                 Title = x.Title,
                 Id = x.Id,
                 Price = x.Price,
-                Photo1 = x.photo1,
-                Photo2 = x.photo2,
+                listviewPhoto = x.listviewPhoto,
                 Description = x.Description,
                 DatePosted = x.DatePosted,
                 DaySended = x.DatePosted.ToString(),

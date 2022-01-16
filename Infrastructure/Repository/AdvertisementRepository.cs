@@ -6,6 +6,8 @@ using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,8 +23,11 @@ namespace Infrastructure.Repository
             _context = context;
             _messageRepository = messageRepository;
         }
+
+        
         public async Task<Advertisement> Add(Advertisement entity)
         {
+          
             await _context.Advertisements.AddAsync(entity);
             await _context.SaveChangesAsync();
             return entity;
@@ -104,41 +109,41 @@ namespace Infrastructure.Repository
 
         public async Task<IEnumerable<Advertisement>> GetCurrentUserAds(IdentityUser user)
         {
-            return await _context.Advertisements.Where(x=>x.UserId == user.Id).AsNoTracking().ToListAsync();
+            return await _context.Advertisements.Where(x => x.UserId == user.Id).AsNoTracking().ToListAsync();
         }
 
-        public async Task<IEnumerable<Advertisement>> GetUnpublishedUserAds(string userId)
+        public  PagedList<Advertisement> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters)
         {
-            return await _context.Advertisements.Where(x => x.UserId == userId && x.Published == true).AsNoTracking().ToListAsync();
+            return PagedList<Advertisement>
+            .ToPagedList(_context.Advertisements.Where(x => x.UserId == userId && x.Published == true).AsNoTracking(),
+            advertisementParameters.PageNumber,
+            advertisementParameters.PageSize);
         }
 
-        public async Task<IEnumerable<Advertisement>> Search(string input)
+        public PagedList<Advertisement> Search(string input, AdvertisementParameters advertisementParameters)
         {
-            var searchResult =  await _context.Advertisements
-                .Where(x => (x.Title.Contains(input) || x.Village.Contains(input))  && x.Published == true).AsNoTracking()
-                .ToListAsync();
+            var searchResult =   _context.Advertisements
+                .Where(x => (x.Title.Contains(input) || x.Village.Contains(input))  && x.Published == true).AsNoTracking();
 
-            return searchResult;
+            return PagedList<Advertisement>
+              .ToPagedList(searchResult,
+              advertisementParameters.PageNumber,
+              advertisementParameters.PageSize);
+           
         }
 
 
-        public async Task<PagedList<Advertisement>> GetAll(string adsType, AdvertisementParameters advertisementParameters)
+        public PagedList<Advertisement> GetAll(string adsType, AdvertisementParameters advertisementParameters)
         {
             return PagedList<Advertisement>
                 .ToPagedList( _context.Advertisements.Where(x => x.AdsType == adsType && x.Published == true)
                 .OrderByDescending(x => x.DatePosted).AsNoTracking(),
                 advertisementParameters.PageNumber,
                 advertisementParameters.PageSize);
-            //return await _context.Advertisements.Where(x => x.AdsType == adsType && x.Published == true)
-            //    .OrderByDescending(x => x.DatePosted)
-            //    .Skip((advertisementParameters.PageNumber - 1) * advertisementParameters.PageSize)
-            //    .Take(advertisementParameters.PageSize)
-            //    .AsNoTracking();
-                
         }
 
 
-        public async Task<PagedList<Advertisement>> GetAll(AdvertisementParameters advertisementParameters)
+        public PagedList<Advertisement> GetAll(AdvertisementParameters advertisementParameters)
         {
 
             return PagedList<Advertisement>
@@ -148,10 +153,15 @@ namespace Infrastructure.Repository
                advertisementParameters.PageSize);
         }
 
-        public async Task<IEnumerable<Advertisement>> GetAllUnpublished()
+        public PagedList<Advertisement> GetAllUnpublished(AdvertisementParameters advertisementParameters)
         {
-
-            return await _context.Advertisements.Where(x => x.Published == false).AsNoTracking().ToListAsync();
+            return PagedList<Advertisement>
+               .ToPagedList(_context.Advertisements
+                   .Where(x => x.Published == false)
+                   .OrderBy(x => x.DatePosted)
+                   .AsNoTracking(),
+               advertisementParameters.PageNumber,
+               advertisementParameters.PageSize);
         }
 
 
@@ -168,6 +178,7 @@ namespace Infrastructure.Repository
                 result.Description = advertisement.Description;
                 result.photo1 = advertisement.photo1;
                 result.photo2 = advertisement.photo2;
+                result.listviewPhoto = advertisement.listviewPhoto;
                 result.Published = false;
                 await _context.SaveChangesAsync();
             }

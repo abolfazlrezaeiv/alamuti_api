@@ -16,6 +16,8 @@ namespace application.DTOs
         public byte[] Photo1 { get; set; }
         public bool Published { get; set; }
         public byte[] Photo2 { get; set; }
+
+        public byte[] listviewPhoto { get; set; }
         public DateTime DatePosted { get ;  set; }
         public string UserId { get; set; }
         public string AdsType { get; set; }
