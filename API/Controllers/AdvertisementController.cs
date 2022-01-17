@@ -72,11 +72,9 @@ namespace API.Controllers
         }
 
         [HttpGet("GetUserAdvertisementInAdminPandel/{userid}")]
-        public async Task<IEnumerable<AdvertisementDto>> GetUserAdvertisementInAdminPandel(string userId
+        public IEnumerable<AdvertisementDto> GetUserAdvertisementInAdminPandel(string userId
             , [FromQuery] AdvertisementParameters advertisementParameters)
         {
-
-
             var result =  _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
 
             var metadata = new
@@ -258,7 +256,7 @@ namespace API.Controllers
         public async Task<Advertisement> DeleteUnpublished(int id) => await _advertisementRepository.DeleteUnpublished(id);
 
 
-        [HttpGet("myalamuti/myAds")]
+        [HttpGet("myalamuti/useradvertisement")]
         public async Task<IEnumerable<AdvertisementDto>> Get()
         {
             var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
