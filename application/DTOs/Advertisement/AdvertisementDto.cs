@@ -12,16 +12,12 @@ namespace application.DTOs
         public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public int Price { get; set; }
-        public byte[] Photo1 { get; set; }
+        public int Price { get; set; } 
         public bool Published { get; set; }
-        public byte[] Photo2 { get; set; }
-
-        public byte[] listviewPhoto { get; set; }
+        public byte[] ListViewPhoto { get; set; }
         public DateTime DatePosted { get ;  set; }
         public string UserId { get; set; }
         public string AdsType { get; set; }
-        public string PhoneNumber { get; set; }
         public string Village { get; set; }
         public int? Area { get; set; }
         private string persianDateForFlutter;

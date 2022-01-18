@@ -1,11 +1,11 @@
 using API;
 using application;
+using application.AutoMapper;
 using Infrastructure;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -13,11 +13,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 );
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(AdvertisementProfile));
+
 builder.Services.Configure<IISOptions>(builder.Configuration);
 builder.Services.AddSignalR(e => {
     e.MaximumReceiveMessageSize = 102400000;
@@ -25,7 +26,7 @@ builder.Services.AddSignalR(e => {
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TodoApp", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Alamuti", Version = "v1" });
     c.AddSecurityDefinition("BearerAuth", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
@@ -38,7 +39,6 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<AuthResponsesOperationFilter>();
 
 });
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Open", builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
@@ -134,15 +134,15 @@ internal class AuthResponsesOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        var attributes = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
+        var attributes = context.MethodInfo.DeclaringType?.GetCustomAttributes(true)
                             .Union(context.MethodInfo.GetCustomAttributes(true));
 
-        if (attributes.OfType<IAllowAnonymous>().Any())
+        if (attributes!.OfType<IAllowAnonymous>().Any())
         {
             return;
         }
 
-        var authAttributes = attributes.OfType<IAuthorizeData>();
+        var authAttributes = attributes!.OfType<IAuthorizeData>();
 
         if (authAttributes.Any())
         {

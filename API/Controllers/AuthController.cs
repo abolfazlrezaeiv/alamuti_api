@@ -6,7 +6,6 @@ using Infrastructure.Data;
 using Infrastructure.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using RestSharp;
@@ -25,7 +24,6 @@ namespace API.Controllers
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly AuthRepository _authRepository;
         private readonly JwtConfig _JwtConfig;
-        private readonly AlamutDbContext _context;
 
         public AuthController(
             UserManager<IdentityUser> userManager,
@@ -34,7 +32,6 @@ namespace API.Controllers
                 AuthRepository authRepository,
                 AlamutDbContext context)
         { 
-            _context = context;
        
 
         _userManager = userManager;
@@ -55,11 +52,8 @@ namespace API.Controllers
             {
                 var existingUser = await _userManager.FindByNameAsync(user.PhoneNumber);
 
-                var sms = new Ghasedak.Core.Api("47541ce5eed0c53032beda134b59199b7d7da859ef6c9c25de5b06f7a9de0798");
-
                 var userphoneNumber = user.PhoneNumber;
 
-                //await sms.SendSMSAsync($"کد فعالسازی {generatedNumber} می باشد\n الموتی ", userphoneNumber, "10008566");
                 var client = new RestClient("https://api.ghasedak.me/v2/verification/send/simple");
                 var request = new RestRequest(Method.POST);
                 request.AddHeader("apikey", "47541ce5eed0c53032beda134b59199b7d7da859ef6c9c25de5b06f7a9de0798");
@@ -244,7 +238,7 @@ namespace API.Controllers
             });
         }
 
-        private async Task<AuthResult> VerifyAndGenerateToken(TokenRequest tokenRequest)
+        private async Task<AuthResult?> VerifyAndGenerateToken(TokenRequest tokenRequest)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
 
@@ -266,7 +260,7 @@ namespace API.Controllers
                 }
 
                 // Validation 3 - validate expiry date
-                var utcExpiryDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+                long.TryParse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp)?.Value,out var utcExpiryDate);
 
                 var expiryDate = UnixTimeStampToDateTime(utcExpiryDate);
 
@@ -320,7 +314,7 @@ namespace API.Controllers
                 }
 
                 // Validation 7 - validate the id
-                var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+                var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
 
                 if (storedToken.JwtId != jti)
                 {
@@ -369,7 +363,7 @@ namespace API.Controllers
             }
         }
 
-        private int GenerateRandomNo()
+        private static int GenerateRandomNo()
         {
             int _min = 1000;
             int _max = 9999;
@@ -377,7 +371,7 @@ namespace API.Controllers
             return _rdm.Next(_min, _max);
         }
 
-        private DateTime UnixTimeStampToDateTime(double unixTimeStamp)
+        private static DateTime UnixTimeStampToDateTime(double unixTimeStamp)
         {
             // Unix timestamp is seconds past epoch
             DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);

@@ -12,14 +12,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AlamutDbContext))]
-    [Migration("20211227023449_changephotoformat")]
-    partial class changephotoformat
+    [Migration("20220117134420_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.0")
+                .HasAnnotation("ProductVersion", "6.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -44,8 +44,20 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("ListViewPhoto")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Photo1")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Photo2")
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<int>("Price")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Published")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
@@ -53,11 +65,8 @@ namespace Infrastructure.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<byte[]>("photo1")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<byte[]>("photo2")
-                        .HasColumnType("varbinary(max)");
+                    b.Property<string>("Village")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

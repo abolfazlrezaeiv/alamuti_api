@@ -6,8 +6,6 @@ using Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -176,9 +174,9 @@ namespace Infrastructure.Repository
                 result.Area = advertisement.Area;
                 result.Price = advertisement.Price;
                 result.Description = advertisement.Description;
-                result.photo1 = advertisement.photo1;
-                result.photo2 = advertisement.photo2;
-                result.listviewPhoto = advertisement.listviewPhoto;
+                result.Photo1 = advertisement.Photo1;
+                result.Photo2 = advertisement.Photo2;
+                result.ListViewPhoto = advertisement.ListViewPhoto;
                 result.Published = false;
                 await _context.SaveChangesAsync();
             }

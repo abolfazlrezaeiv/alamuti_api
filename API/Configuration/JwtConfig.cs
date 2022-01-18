@@ -2,7 +2,10 @@
 {
     public class JwtConfig
     {
-        public string Secret { get; set; }
+
+        public string Secret { get; set; } = "default secret jwtconfig";
+
+
         public TimeSpan ExpiryTimeFrame { get; internal set; }
     }
 }

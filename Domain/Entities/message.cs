@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Entities
 {
-    public class ChatMessage
+    public class ChatMessage : IEntity
     {
         public int Id { get; set; }
         public string Sender { get; set; }

@@ -1,13 +1,14 @@
 ﻿using application.DTOs;
 using application.DTOs.Advertisement;
 using application.Interfaces.repository;
+using AutoMapper;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
-using System.Security.Claims;
+
 
 namespace API.Controllers
 {
@@ -17,22 +18,19 @@ namespace API.Controllers
     public class AdvertisementController : ControllerBase
     {
         private readonly IAdvertisementRepository _advertisementRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<IdentityUser> _userManager;
-     
+        private readonly IMapper _mapper;
 
-      
-
-        public AdvertisementController(IAdvertisementRepository advertisementRepository,IHttpContextAccessor httpContextAccessor,UserManager<IdentityUser> userManager)
+        public AdvertisementController(IAdvertisementRepository advertisementRepository,UserManager<IdentityUser> userManager, IMapper mapper)
         {
             _advertisementRepository = advertisementRepository;
-            _httpContextAccessor = httpContextAccessor;
-            _userManager = userManager; 
+            _userManager = userManager;
+            _mapper = mapper;
         }
 
 
         [HttpGet("getUnpublished")]
-        public async Task<IEnumerable<AdvertisementDto>> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
+        public  IEnumerable<AdvertisementDto> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
         {
 
 
@@ -50,29 +48,13 @@ namespace API.Controllers
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
 
-            return  result.Select(x => new AdvertisementDto 
-            {
-                Title = x.Title,
-                Id = x.Id,
-                Price = x.Price,
-                listviewPhoto = x.listviewPhoto,
-                Description = x.Description,
-                DatePosted = x.DatePosted,
-                DaySended = x.DatePosted.ToString(),
-                PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
-                Published = x.Published,
-                AdsType = x.AdsType,
-                Area = x.Area,
-                UserId = x.UserId,
-                Village = x.Village,
-
-            });
+            return result.Select(x => _mapper.Map<AdvertisementDto>(x));
          
           
         }
 
         [HttpGet("GetUserAdvertisementInAdminPandel/{userid}")]
-        public IEnumerable<AdvertisementDto> GetUserAdvertisementInAdminPandel(string userId
+        public IEnumerable<AdvertisementDetailDto> GetUserAdvertisementInAdminPandel(string userId
             , [FromQuery] AdvertisementParameters advertisementParameters)
         {
             var result =  _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
@@ -89,23 +71,7 @@ namespace API.Controllers
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
 
-            return result.Select(x => new AdvertisementDto
-            {
-                Title = x.Title,
-                Id = x.Id,
-                Price = x.Price,
-                listviewPhoto = x.listviewPhoto,    
-                Description = x.Description,
-                DatePosted = x.DatePosted,
-                DaySended = x.DatePosted.ToString(),
-                AdsType = x.AdsType,
-                PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
-                Published = x.Published,
-                Area = x.Area,
-                UserId = x.UserId,
-                Village = x.Village,
-
-            });
+            return result.Select(x => _mapper.Map<AdvertisementDetailDto>(x));
 
 
         }
@@ -113,7 +79,6 @@ namespace API.Controllers
         [HttpGet("filter/{adstype}")]
         public IEnumerable<AdvertisementDto> GetAll([FromQuery] AdvertisementParameters advertisementParameters, string? adstype)
         {
-            IEnumerable<AdvertisementDto> result;
             object metadata;
             if (string.IsNullOrWhiteSpace(adstype))
             {
@@ -129,22 +94,8 @@ namespace API.Controllers
                     allAdvertisement.HasPrevious
                 };
 
-                result = allAdvertisement.Select(x => new AdvertisementDto
-                {
-                    Title = x.Title,
-                    Id = x.Id,
-                    Price = x.Price,
-                    listviewPhoto = x.listviewPhoto,
-                    Description = x.Description,
-                    DatePosted = x.DatePosted,
-                    DaySended = x.DatePosted.ToString(),
-                    AdsType = x.AdsType,
-                    PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
-                    Published = x.Published,
-                    Area = x.Area,
-                    UserId = x.UserId,
-                    Village = x.Village,
-                });
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+                return allAdvertisement.Select(x => _mapper.Map<AdvertisementDto>(x));
             }
             else
             {
@@ -160,28 +111,13 @@ namespace API.Controllers
                     filteredResult.HasPrevious
                 };
 
-                result = filteredResult.Select(x => new AdvertisementDto
-                {
-                    Title = x.Title,
-                    Id = x.Id,
-                    Price = x.Price,     
-                    listviewPhoto = x.listviewPhoto,
-                    Description = x.Description,
-                    DatePosted = x.DatePosted,
-                    DaySended = x.DatePosted.ToString(),
-                    AdsType = x.AdsType,
-                    PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
-                    Published = x.Published,
-                    Area = x.Area,
-                    UserId = x.UserId,
-                    Village = x.Village,
-                });
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+                return filteredResult.Select(x => _mapper.Map<AdvertisementDto>(x));
             }
 
           
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
 
-            return result;
          
         }
         [HttpGet("search/{input}")]
@@ -201,50 +137,14 @@ namespace API.Controllers
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
 
-            return Ok(searchResult.Select(x => new AdvertisementDto
-                {
-                    Title = x.Title,
-                    Id = x.Id,
-                    Price = x.Price,
-                  listviewPhoto = x.listviewPhoto,
-                    Description = x.Description,
-                    DatePosted = x.DatePosted,
-                    DaySended = x.DatePosted.ToString(),
-                    AdsType = x.AdsType,
-                    Area = x.Area,
-                    PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
-                    Published = x.Published,
-                    UserId = x.UserId,
-                    Village = x.Village,
-                }));
-       
-
-          
-           
+            return Ok(searchResult.Select(x => _mapper.Map<AdvertisementDto>(x)));
         }
 
 
         [HttpGet("{id}")]
-        public async Task<AdvertisementDto> Get(int id) {
+        public async Task<AdvertisementDetailDto> Get(int id) {
             var result = await _advertisementRepository.Get(id);
-            return new AdvertisementDto
-            {
-                Title = result.Title,
-                Id = result.Id,
-                Price = result.Price,
-                Photo1 = result.photo1,
-                Photo2 = result.photo2,
-                Description = result.Description,
-                DatePosted = result.DatePosted,
-                DaySended = result.DatePosted.ToString(),
-                AdsType = result.AdsType,
-                Area = result.Area,
-                PhoneNumber = _userManager.FindByIdAsync(result.UserId).Result.UserName,
-                Published = result.Published,
-                UserId = result.UserId,
-                Village = result.Village,
-            };
-
+            return _mapper.Map<AdvertisementDetailDto>(result);
         }
 
 
@@ -262,22 +162,7 @@ namespace API.Controllers
             var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
             var userAds = await  _advertisementRepository.GetCurrentUserAds(currentuser);
 
-            return userAds.Select(x => new AdvertisementDto
-            {
-                Title = x.Title,
-                Id = x.Id,
-                Price = x.Price,
-                listviewPhoto = x.listviewPhoto,
-                Description = x.Description,
-                DatePosted = x.DatePosted,
-                DaySended = x.DatePosted.ToString(),
-                AdsType = x.AdsType,
-                Area = x.Area,
-                PhoneNumber = _userManager.FindByIdAsync(x.UserId).Result.UserName,
-                Published = x.Published,
-                UserId = x.UserId,
-                Village = x.Village,
-            });
+            return userAds.Select(x => _mapper.Map<AdvertisementDto>(x));
         }
 
         [HttpPost]
