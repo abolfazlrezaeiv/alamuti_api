@@ -1,14 +1,13 @@
 ﻿using application;
 using application.DTOs.Requests;
 using application.DTOs.Responses;
+using application.Interfaces;
 using Domain.Entities;
-using Infrastructure.Data;
 using Infrastructure.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using RestSharp;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -23,20 +22,21 @@ namespace API.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly TokenValidationParameters _tokenValidationParameters;
         private readonly AuthRepository _authRepository;
+        private readonly IOTPSevice _otpService;
         private readonly JwtConfig _JwtConfig;
 
         public AuthController(
             UserManager<IdentityUser> userManager,
             IOptionsMonitor<JwtConfig> optionsMonitor,
                 TokenValidationParameters tokenValidationParameters,
-                AuthRepository authRepository,
-                AlamutDbContext context)
+                AuthRepository authRepository, IOTPSevice otpService)
         { 
        
 
         _userManager = userManager;
             _tokenValidationParameters = tokenValidationParameters;
             _authRepository = authRepository;
+            _otpService = otpService;
             _JwtConfig = optionsMonitor.CurrentValue;
         }
 
@@ -44,6 +44,8 @@ namespace API.Controllers
         [HttpPost("/register")]
         public async Task<IActionResult> Register([FromBody] UserRegistrationDto user)
         {
+            
+
             if (user == null) return BadRequest();
 
             var generatedNumber = GenerateRandomNo();
@@ -54,16 +56,7 @@ namespace API.Controllers
 
                 var userphoneNumber = user.PhoneNumber;
 
-                var client = new RestClient("https://api.ghasedak.me/v2/verification/send/simple");
-                var request = new RestRequest(Method.POST);
-                request.AddHeader("apikey", "47541ce5eed0c53032beda134b59199b7d7da859ef6c9c25de5b06f7a9de0798");
-                request.AddParameter("receptor", $"{userphoneNumber}");
-                request.AddParameter("type", 1);
-                request.AddParameter("template", "alamut2");
-                request.AddParameter("param1", $"{generatedNumber}"); 
-             
-               
-                IRestResponse response = client.Execute(request);
+                 _otpService.SendMessage(userphoneNumber, generatedNumber);
 
                 if (existingUser != null)
                 {

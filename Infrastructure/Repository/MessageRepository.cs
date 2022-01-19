@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using application.DTOs;
+using application.DTOs.Chat;
+using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -60,15 +62,15 @@ namespace Infrastructure.Repository
         }
 
 
-        public async Task<IEnumerable<ChatMessage>> GetMessages(string groupName)
+        public PagedList<ChatMessage> GetMessages(string groupName, MessageParameters messageParameters)
         {
-
-             return await _context.Messages.Where(x=>x.GroupName == groupName).ToListAsync();
+            return PagedList<ChatMessage>.ToPagedList(_context.Messages.Where(x => x.GroupName == groupName).AsNoTracking(),
+               messageParameters.PageNumber,
+               messageParameters.PageSize);
         }
 
         public async Task<ChatMessage> GetLastMessageOfGroup (string groupName)
         {
-
             return await _context.Messages.Where(x => x.GroupName == groupName).OrderBy(x=>x.DateSended).LastAsync();
         }
 

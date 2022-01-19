@@ -1,14 +1,12 @@
-﻿using application.DTOs;
-using application.DTOs.Chat;
-using application.Interfaces.Data;
-using application.Interfaces.repository;
+﻿using application.DTOs.Chat;
+using AutoMapper;
 using Domain.Entities;
 using Infrastructure.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using Newtonsoft.Json;
 
 namespace API.Controllers
 {
@@ -19,12 +17,13 @@ namespace API.Controllers
     {
         private readonly MessageRepository _messageRepository;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IMapper _mapper;
 
-        public ChatController(MessageRepository messageRepository, UserManager<IdentityUser> userManager)
+        public ChatController(MessageRepository messageRepository, UserManager<IdentityUser> userManager, IMapper mapper)
         {
             _messageRepository = messageRepository;
             _userManager = userManager;
-
+            _mapper = mapper;
         }
 
         [HttpGet("massages")]
@@ -35,20 +34,23 @@ namespace API.Controllers
 
 
         [HttpGet("massages/{groupname}")]
-        public async Task<IEnumerable<ChatMessageDto>> Get(string groupname)
+        public  IEnumerable<ChatMessageDto> Get(string groupname,[FromQuery] MessageParameters messageParameters)
         {
-            var messages = await _messageRepository.GetMessages(groupname);
-            return messages.Select(x=>new ChatMessageDto() 
-            { 
-                Sender = x.Sender,
-                Reciever = x.Reciever,
-                Id = x.Id,
-                DateSended = x.DateSended,
-                GroupName = groupname,
-                Message = x.Message,
-                DaySended = x.DateSended.ToString()
-            });
+            var messages =  _messageRepository.GetMessages(groupname, messageParameters);
 
+            var metadata = new
+            {
+                messages.TotalCount,
+                messages.PageSize,
+                messages.CurrentPage,
+                messages.TotalPages,
+                messages.HasNext,
+                messages.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            return messages.Select(x => _mapper.Map<ChatMessageDto>(x));
         }
 
         [HttpDelete("group/{groupname}")]

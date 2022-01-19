@@ -21,12 +21,10 @@ namespace application.DTOs.Advertisement
         public string Village { get; set; }
         public int? Area { get; set; }
         private string persianDateForView;
-
         public string DaySended
         {
             get
             {
-
                 return persianDateForView;
             }
             set

@@ -1,9 +1,10 @@
-﻿using application.Interfaces.repository;
+﻿using application.AutoMapper;
+using application.AutoMapper.Chat;
+using application.Interfaces;
+using application.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace application
 {
@@ -13,7 +14,8 @@ namespace application
              this IServiceCollection service,
              IConfiguration configuration)
         {
-
+            service.AddAutoMapper(typeof(AdvertisementProfile),typeof(ChatProfile));
+            service.AddScoped<IOTPSevice , OTPServices>();
             return service;
         }
     }

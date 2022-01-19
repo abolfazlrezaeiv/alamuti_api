@@ -1,6 +1,5 @@
 using API;
 using application;
-using application.AutoMapper;
 using Infrastructure;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,15 +13,11 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-);
-builder.Services.AddControllers();
-builder.Services.AddAutoMapper(typeof(AdvertisementProfile));
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
+builder.Services.AddControllers();
 builder.Services.Configure<IISOptions>(builder.Configuration);
-builder.Services.AddSignalR(e => {
-    e.MaximumReceiveMessageSize = 102400000;
-});
+builder.Services.AddSignalR(e => { e.MaximumReceiveMessageSize = 102400000;});
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -96,10 +91,12 @@ builder.Services.AddIdentityCore<IdentityUser>(
         options.Password.RequireDigit = true;
         options.Password.RequiredLength = 4;
     }).AddEntityFrameworkStores<AlamutDbContext>();
-    
+
+
 
 
 var app = builder.Build();
+
 app.UseDeveloperExceptionPage();
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Alamuti v1"));
@@ -111,7 +108,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

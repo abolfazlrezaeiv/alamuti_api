@@ -2,7 +2,7 @@
 using application.DTOs.Advertisement;
 using AutoMapper;
 using Domain.Entities;
-
+using Microsoft.AspNetCore.Identity;
 
 namespace application.AutoMapper
 {
@@ -12,6 +12,7 @@ namespace application.AutoMapper
     {
         public AdvertisementProfile()
         {
+          
             CreateMap<Advertisement, AdvertisementDto>()
                 .AddTransform<byte[]>(s => s.Length < 2 ? null : s)
                 .ForMember(dest =>
@@ -22,7 +23,9 @@ namespace application.AutoMapper
                 .AddTransform<byte[]>(s => s.Length < 2 ? null : s)
                 .ForMember(dest =>
                     dest.DaySended,
-                    opt => opt.MapFrom(src => src.DatePosted.ToString()));
+                    opt => opt.MapFrom(src => src.DatePosted.ToString()))
+                .AfterMap<MapPhoneNumber>();
+
         }
     }
 }
