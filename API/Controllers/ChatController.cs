@@ -67,13 +67,13 @@ namespace API.Controllers
 
 
 
-        [HttpGet("groups")]
-        public async Task<IActionResult> GetGroups()
-        {
-            var userId = User.Claims.FirstOrDefault()?.Value;
-            return Ok(await _messageRepository.GetAllGroup(userId));
+        //[HttpGet("groups")]
+        //public async Task<IActionResult> GetGroups()
+        //{
+        //    var userId = User.Claims.FirstOrDefault()?.Value;
+        //    return Ok(await _messageRepository.GetAllGroup(userId));
            
-        }
+        //}
 
         [HttpGet("groupswithmessages")]
         public async Task<IActionResult> GetGroupsWithMessages()
@@ -81,24 +81,7 @@ namespace API.Controllers
             var userId = User.Claims.FirstOrDefault()?.Value;
             var groups = await _messageRepository.GetGroupWithMessages(userId);
            
-            var result = groups.Select(group=>new ChatGroupDto()
-                {Name = group.Name,
-                Id = group.Id,
-                IsChecked = group.IsChecked,
-                Image = group.Image,
-                Title = group.Title,
-                
-                    LastMessage = new ChatMessageDto()
-                    {
-                        DateSended = group.Messages.Last().DateSended,
-                        DaySended = group.Messages.Last().DateSended.ToString(),
-                        GroupName = group.Messages.Last().GroupName,
-                        Message = group.Messages.Last().Message,
-                        Id = group.Messages.Last().Id,
-                        Reciever = group.Messages.Last().Reciever,
-                        Sender = group.Messages.Last().Sender,
-                    }
-            });
+            var result = groups.Select(group=> _mapper.Map<ChatGroupDto>(group));
            
             return Ok(result);
         }

@@ -64,7 +64,10 @@ namespace Infrastructure.Repository
 
         public PagedList<ChatMessage> GetMessages(string groupName, MessageParameters messageParameters)
         {
-            return PagedList<ChatMessage>.ToPagedList(_context.Messages.Where(x => x.GroupName == groupName).AsNoTracking(),
+            return PagedList<ChatMessage>
+                .ToPagedList(
+                _context.Messages.Where(x => x.GroupName == groupName)
+                .AsNoTracking().OrderByDescending(x => x.DateSended),
                messageParameters.PageNumber,
                messageParameters.PageSize);
         }
@@ -77,10 +80,12 @@ namespace Infrastructure.Repository
         public async Task<ChatGroup> DeleteGroup(string groupName)
         {
 
-            var group = await _context.ChatGroups.Where(x => x.Name == groupName).FirstAsync();
+            var group = await _context.ChatGroups.Include(x => x.Messages).Where(x => x.Name == groupName).FirstAsync();
             if (group != null)
             {
                 _context.ChatGroups.Remove(group);
+                var messages = _context.Messages.Where(x => x.GroupName == group.Name);
+                _context.Messages.RemoveRange(messages);
                 await _context.SaveChangesAsync();
 
                 return group;
@@ -88,19 +93,17 @@ namespace Infrastructure.Repository
             return null;
         }
 
-        public  async Task<IEnumerable<ChatGroup>> GetAllGroup(string userId)
-        {
-            return await _context.ChatGroups.Where(x => x.Name.Contains(userId)).ToListAsync();
-
-        }
+       
         public async Task<List<ChatGroup>> GetGroupWithMessages(string userId)
         {
-            var groups =await _context.ChatGroups.Where(x => x.Name.Contains(userId))
-                     .Include(b => b.Messages.OrderBy(x=>x.DateSended))
-                     .OrderByDescending(x=>x.Messages.OrderBy(x=>x.DateSended).Last().DateSended)
-                     .ToListAsync();
-                     
-            return groups;
+
+
+            return await _context.ChatGroups
+                .Where(x => x.Name.Contains(userId))
+                .Include(b => b.Messages.OrderBy(x => x.DateSended))
+                .OrderByDescending(x => x.Messages.OrderBy(x => x.DateSended).Last().DateSended)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
 
