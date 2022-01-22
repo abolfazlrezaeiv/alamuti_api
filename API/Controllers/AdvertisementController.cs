@@ -157,12 +157,12 @@ namespace API.Controllers
 
 
         [HttpGet("myalamuti/useradvertisement")]
-        public async Task<IEnumerable<AdvertisementDto>> Get()
+        public async Task<IEnumerable<UserAdvertisementDto>> Get()
         {
             var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
             var userAds = await  _advertisementRepository.GetCurrentUserAds(currentuser);
 
-            return userAds.Select(x => _mapper.Map<AdvertisementDto>(x));
+            return userAds.Select(x => _mapper.Map<UserAdvertisementDto>(x));
         }
 
         [HttpPost]

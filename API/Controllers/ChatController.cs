@@ -56,13 +56,9 @@ namespace API.Controllers
         [HttpDelete("group/{groupname}")]
         public async Task<IActionResult> DeleteGroup(string groupname)
         {
-            var deletedGroup = Ok(await _messageRepository.DeleteGroup(groupname));
-
-            if (deletedGroup != null)
-            {
-                return Ok(deletedGroup);
-            }
-            return NotFound();
+            await _messageRepository.DeleteGroup(groupname);
+            return Ok();
+           
         }
 
 
@@ -90,14 +86,17 @@ namespace API.Controllers
         [HttpPost("addgroup")]
         public async Task<IActionResult> Post([FromForm] ChatGroup group)
         {
-            return Ok(await _messageRepository.AddGroup(group));
-            
+             await _messageRepository.AddGroup(group);
+            return Ok();
+
+
         }
 
         [HttpPut]
         public async Task<IActionResult> Put([FromForm] ChatGroup group)
         {
-            return Ok(await _messageRepository.UpdateGroup(group)); 
+            await _messageRepository.UpdateGroup(group);
+            return Ok(); 
         }
 
 
@@ -110,10 +109,10 @@ namespace API.Controllers
 
 
         [HttpPost()]
-        public async Task<ChatMessage> Post([FromBody] ChatMessage message)
+        public async Task<IActionResult> Post([FromBody] ChatMessage message)
         {
-            Ok(await _messageRepository.Add(message));
-            return message;
+            await _messageRepository.Add(message);
+            return Ok();
         }
     }
 }

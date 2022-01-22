@@ -26,6 +26,12 @@ namespace application.AutoMapper
                     opt => opt.MapFrom(src => src.DatePosted.ToString()))
                 .AfterMap<MapPhoneNumber>();
 
+            CreateMap<Advertisement, UserAdvertisementDto>()
+              .AddTransform<byte[]>(s => s.Length < 2 ? null : s)
+              .ForMember(dest =>
+                  dest.DaySended,
+                  opt => opt.MapFrom(src => src.DatePosted.ToString()));
+
         }
     }
 }

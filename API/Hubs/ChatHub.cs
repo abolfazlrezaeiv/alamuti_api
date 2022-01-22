@@ -33,15 +33,7 @@ namespace API
 
         }
 
-        public async Task ResponseMessage(string receiverId, string senderId, string message)
-        {
-            var groupname = $"{senderId + receiverId}";
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupname);
-
-            await Clients.Group(groupname).SendAsync("ReceiveMessage", receiverId, senderId, message);
-
-        }
 
 
         public async Task CreateMyGroup(string MyGroupId)
