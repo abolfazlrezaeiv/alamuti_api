@@ -24,12 +24,7 @@ namespace Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<ChatGroup>()
-            //    .HasMany(b => b.Messages)
-            //    .WithOne(e => e.ChatGroup)
-            //    .IsRequired();
-
-
+       
             modelBuilder.Entity<ChatMessage>()
              .HasOne(p => p.ChatGroup)
              .WithMany(b => b.Messages)

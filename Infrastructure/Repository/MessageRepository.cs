@@ -20,8 +20,8 @@ namespace Infrastructure.Repository
 
         public async Task AddGroup(ChatGroup group)
         {
-            var groupExists =  await  _context.ChatGroups.ContainsAsync(group);
-            if (!groupExists)
+            var existedChatGroup =  await  _context.ChatGroups.Where(x=> x.Name == group.Name).ToListAsync();
+            if (existedChatGroup.Count == 0)
             {
                 await _context.ChatGroups.AddAsync(group);
                 await _context.SaveChangesAsync();
@@ -36,7 +36,12 @@ namespace Infrastructure.Repository
 
         public async Task<ChatMessage> AddMessageToGroup(string groupName,ChatMessage message)
         {
-            var availableGroup = await  _context.ChatGroups.Where(x => x.Name == groupName).FirstAsync();
+            var availableGroup = await  _context.ChatGroups.Where(x => x.Name == groupName ).FirstAsync();
+         
+            availableGroup.IsChecked = false;
+                
+            await _context.SaveChangesAsync();
+
             await _context.Messages.AddAsync(new ChatMessage() 
             { 
                 Sender = message.Sender,
@@ -53,7 +58,6 @@ namespace Infrastructure.Repository
 
         public async Task<IEnumerable<ChatMessage>> GetAllMessages()
         {
-
             return await _context.Messages.ToListAsync();
         }
 
@@ -68,10 +72,12 @@ namespace Infrastructure.Repository
                messageParameters.PageSize);
         }
 
+
         public async Task<ChatMessage> GetLastMessageOfGroup (string groupName)
         {
             return await _context.Messages.Where(x => x.GroupName == groupName).OrderBy(x=>x.DateSended).LastAsync();
         }
+
 
         public async Task DeleteGroup(string groupName)
         {
@@ -87,16 +93,29 @@ namespace Infrastructure.Repository
         }
 
        
-        public async Task<List<ChatGroup>> GetGroupWithMessages(string userId)
+        public PagedList<ChatGroup> GetGroupWithMessages(string userId, MessageParameters messageParameters)
         {
-
-
-            return await _context.ChatGroups
-                .Where(x => x.Name.Contains(userId))
+            return PagedList<ChatGroup>
+              .ToPagedList(
+              _context.ChatGroups
                 .Include(b => b.Messages.OrderBy(x => x.DateSended))
+                .Where(x => x.Name.Contains(userId) && x.Messages.Count != 0)
                 .OrderByDescending(x => x.Messages.OrderBy(x => x.DateSended).Last().DateSended)
-                .AsNoTracking()
-                .ToListAsync();
+                .AsNoTracking(),
+             messageParameters.PageNumber,
+             messageParameters.PageSize);
+
+        }
+
+
+        public async Task<List<ChatGroup>> GetGroups(string userId)
+        {
+            return await _context.ChatGroups
+                .Include(b => b.Messages.OrderBy(x => x.DateSended))
+                .Where(x => x.Name.Contains(userId) && x.Messages.Count != 0)
+                .OrderByDescending(x => x.Messages.OrderBy(x => x.DateSended).Last().DateSended)
+                .AsNoTracking().ToListAsync();
+
         }
 
 
@@ -126,8 +145,6 @@ namespace Infrastructure.Repository
                
                 await _context.SaveChangesAsync();
             }
-           
         }
-
     }
 }

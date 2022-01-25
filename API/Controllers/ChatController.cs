@@ -53,6 +53,38 @@ namespace API.Controllers
             return messages.Select(x => _mapper.Map<ChatMessageDto>(x));
         }
 
+        [HttpGet("groupswithmessages")]
+        public IEnumerable<ChatGroupDto> GetGroupsWithMessages([FromQuery] MessageParameters messageParameters)
+        {
+            var userId = User.Claims.FirstOrDefault()?.Value;
+            var groups =  _messageRepository.GetGroupWithMessages(userId, messageParameters);
+
+            var metadata = new
+            {
+                groups.TotalCount,
+                groups.PageSize,
+                groups.CurrentPage,
+                groups.TotalPages,
+                groups.HasNext,
+                groups.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            return  groups.Select(group => _mapper.Map<ChatGroupDto>(group));
+        }
+
+
+
+        [HttpGet("groups")]
+        public async Task<IEnumerable<ChatGroupDto>> GetUserGroups()
+        {
+            var userId = User.Claims.FirstOrDefault()?.Value;
+            var groups = await _messageRepository.GetGroups(userId);
+            return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
+        }
+
+
         [HttpDelete("group/{groupname}")]
         public async Task<IActionResult> DeleteGroup(string groupname)
         {
@@ -71,25 +103,14 @@ namespace API.Controllers
            
         //}
 
-        [HttpGet("groupswithmessages")]
-        public async Task<IActionResult> GetGroupsWithMessages()
-        {
-            var userId = User.Claims.FirstOrDefault()?.Value;
-            var groups = await _messageRepository.GetGroupWithMessages(userId);
-           
-            var result = groups.Select(group=> _mapper.Map<ChatGroupDto>(group));
-           
-            return Ok(result);
-        }
+       
 
 
         [HttpPost("addgroup")]
         public async Task<IActionResult> Post([FromForm] ChatGroup group)
         {
-             await _messageRepository.AddGroup(group);
+            await _messageRepository.AddGroup(group);
             return Ok();
-
-
         }
 
         [HttpPut]

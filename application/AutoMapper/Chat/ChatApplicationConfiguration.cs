@@ -24,7 +24,7 @@ namespace application.AutoMapper.Chat
                .AddTransform<byte[]>(s => s.Length < 2 ? null : s)
                .ForMember(dest =>
                    dest.LastMessage,
-                      opt => opt.MapFrom(src => new ChatMessageDto
+                      opt =>  opt.MapFrom(src => new ChatMessageDto
                       {
                           
                           Sender = src.Messages.Last().Sender,
@@ -34,7 +34,7 @@ namespace application.AutoMapper.Chat
                           DateSended = src.Messages.Last().DateSended,
                           DaySended = src.Messages.Last().DateSended.ToString(),
                           Id = src.Messages.Last().Id
-                      }));
+                      }  ));
         }
     }
 }
