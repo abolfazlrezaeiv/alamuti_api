@@ -21,7 +21,7 @@ namespace API.Controllers
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IMapper _mapper;
 
-        public AdvertisementController(IAdvertisementRepository advertisementRepository,UserManager<IdentityUser> userManager, IMapper mapper)
+        public AdvertisementController(IAdvertisementRepository advertisementRepository, UserManager<IdentityUser> userManager, IMapper mapper)
         {
             _advertisementRepository = advertisementRepository;
             _userManager = userManager;
@@ -30,11 +30,11 @@ namespace API.Controllers
 
 
         [HttpGet("getUnpublished")]
-        public  IEnumerable<AdvertisementDto> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
+        public IEnumerable<AdvertisementDto> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
         {
 
 
-            var result =  _advertisementRepository.GetAllUnpublished(advertisementParameters);
+            var result = _advertisementRepository.GetAllUnpublished(advertisementParameters);
 
             var metadata = new
             {
@@ -49,15 +49,15 @@ namespace API.Controllers
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
 
             return result.Select(x => _mapper.Map<AdvertisementDto>(x));
-         
-          
+
+
         }
 
         [HttpGet("GetUserAdvertisementInAdminPandel/{userid}")]
         public IEnumerable<AdvertisementDetailDto> GetUserAdvertisementInAdminPandel(string userId
             , [FromQuery] AdvertisementParameters advertisementParameters)
         {
-            var result =  _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
+            var result = _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
 
             var metadata = new
             {
@@ -82,9 +82,9 @@ namespace API.Controllers
             object metadata;
             if (string.IsNullOrWhiteSpace(adstype))
             {
-                var allAdvertisement =  _advertisementRepository.GetAll(advertisementParameters);
+                var allAdvertisement = _advertisementRepository.GetAll(advertisementParameters);
 
-                 metadata = new
+                metadata = new
                 {
                     allAdvertisement.TotalCount,
                     allAdvertisement.PageSize,
@@ -99,7 +99,7 @@ namespace API.Controllers
             }
             else
             {
-                var filteredResult =  _advertisementRepository.GetAll(adstype, advertisementParameters);
+                var filteredResult = _advertisementRepository.GetAll(adstype, advertisementParameters);
 
                 metadata = new
                 {
@@ -116,14 +116,14 @@ namespace API.Controllers
                 return filteredResult.Select(x => _mapper.Map<AdvertisementDto>(x));
             }
 
-          
 
-         
+
+
         }
         [HttpGet("search/{input}")]
         public IActionResult Search(string input, [FromQuery] AdvertisementParameters advertisementParameters)
         {
-            var searchResult =  _advertisementRepository.Search(input, advertisementParameters);
+            var searchResult = _advertisementRepository.Search(input, advertisementParameters);
 
             var metadata = new
             {
@@ -142,7 +142,8 @@ namespace API.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<AdvertisementDetailDto> Get(int id) {
+        public async Task<AdvertisementDetailDto> Get(int id)
+        {
             var result = await _advertisementRepository.Get(id);
             return _mapper.Map<AdvertisementDetailDto>(result);
         }
@@ -156,11 +157,23 @@ namespace API.Controllers
         public async Task<Advertisement> DeleteUnpublished(int id) => await _advertisementRepository.DeleteUnpublished(id);
 
 
-        [HttpGet("myalamuti/useradvertisement")]
-        public async Task<IEnumerable<UserAdvertisementDto>> Get()
+        [HttpGet("useradvertisement")]
+        public async Task<IEnumerable<UserAdvertisementDto>> Get([FromQuery] AdvertisementParameters advertisementParameters)
         {
             var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
-            var userAds = await  _advertisementRepository.GetCurrentUserAds(currentuser);
+            var userAds = _advertisementRepository.GetCurrentUserAds(currentuser, advertisementParameters);
+
+            var metadata = new
+            {
+                userAds.TotalCount,
+                userAds.PageSize,
+                userAds.CurrentPage,
+                userAds.TotalPages,
+                userAds.HasNext,
+                userAds.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
 
             return userAds.Select(x => _mapper.Map<UserAdvertisementDto>(x));
         }
@@ -203,7 +216,7 @@ namespace API.Controllers
                 return Ok(ads);
             }
             return NotFound();
-            
+
         }
     }
 }

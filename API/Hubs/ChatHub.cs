@@ -16,26 +16,26 @@ namespace API
             _repository = repository;
         }
 
-      
-        public async Task SendMessage(string receiverId,string senderId, string message,string groupNameFromClient,string grouptitle,string? groupImage)
+
+        public async Task SendMessage(string receiverId, string senderId, string message, string groupNameFromClient, string grouptitle, string? groupImage)
         {
 
             //var groupnameFirstTime = $"{receiverId + senderId + grouptitle}";
 
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupNameFromClient );
+            await Groups.AddToGroupAsync(Context.ConnectionId, groupNameFromClient);
 
             await Clients.Group(groupNameFromClient).SendAsync("ReceiveMessage", receiverId, senderId, message, groupNameFromClient, grouptitle);
-          
-            await _repository.AddMessageToGroup(groupNameFromClient, new ChatMessage { Sender = senderId, Reciever = receiverId, DateSended = DateTime.UtcNow, Message = message, GroupName = groupNameFromClient});
+
+            await _repository.AddMessageToGroup(groupNameFromClient, new ChatMessage { Sender = senderId, Reciever = receiverId, DateSended = DateTime.UtcNow, Message = message, GroupName = groupNameFromClient });
 
         }
 
         public async Task InitializeChat(string receiverId, string senderId, string? groupNameFromClient, string grouptitle, string? groupImage)
         {
 
-                await Clients.Group(receiverId).SendAsync("InitializeChat", receiverId, senderId,  groupNameFromClient, grouptitle);
+            await Clients.Group(receiverId).SendAsync("InitializeChat", receiverId, senderId, groupNameFromClient, grouptitle);
 
-                await _repository.AddGroup(new ChatGroup() { Name = groupNameFromClient, Title = grouptitle, Image = groupImage ,IsChecked = false});
+            await _repository.AddGroup(new ChatGroup() { Name = groupNameFromClient, Title = grouptitle, Image = groupImage, IsChecked = false });
 
         }
 
@@ -51,13 +51,13 @@ namespace API
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
         }
 
-        public async Task CreateNewGroup(string groupname,string title)
+        public async Task CreateNewGroup(string groupname, string title)
         {
-            await _repository.AddGroup(new ChatGroup() { Name = groupname,Title = title});
+            await _repository.AddGroup(new ChatGroup() { Name = groupname, Title = title });
 
-            await _repository.UpdateGroup(new ChatGroup() { Name = groupname, IsChecked = false});
+            await _repository.UpdateGroup(groupname);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupname);
         }
-    }  
+    }
 }

@@ -34,9 +34,9 @@ namespace API.Controllers
 
 
         [HttpGet("massages/{groupname}")]
-        public  IEnumerable<ChatMessageDto> Get(string groupname,[FromQuery] MessageParameters messageParameters)
+        public IEnumerable<ChatMessageDto> Get(string groupname, [FromQuery] MessageParameters messageParameters)
         {
-            var messages =  _messageRepository.GetMessages(groupname, messageParameters);
+            var messages = _messageRepository.GetMessages(groupname, messageParameters);
 
             var metadata = new
             {
@@ -57,7 +57,7 @@ namespace API.Controllers
         public IEnumerable<ChatGroupDto> GetGroupsWithMessages([FromQuery] MessageParameters messageParameters)
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
-            var groups =  _messageRepository.GetGroupWithMessages(userId, messageParameters);
+            var groups = _messageRepository.GetGroupWithMessages(userId, messageParameters);
 
             var metadata = new
             {
@@ -71,7 +71,7 @@ namespace API.Controllers
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
 
-            return  groups.Select(group => _mapper.Map<ChatGroupDto>(group));
+            return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
         }
 
 
@@ -90,20 +90,9 @@ namespace API.Controllers
         {
             await _messageRepository.DeleteGroup(groupname);
             return Ok();
-           
+
         }
 
-
-
-        //[HttpGet("groups")]
-        //public async Task<IActionResult> GetGroups()
-        //{
-        //    var userId = User.Claims.FirstOrDefault()?.Value;
-        //    return Ok(await _messageRepository.GetAllGroup(userId));
-           
-        //}
-
-       
 
 
         [HttpPost("addgroup")]
@@ -113,16 +102,16 @@ namespace API.Controllers
             return Ok();
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Put([FromForm] ChatGroup group)
+        [HttpPut("group/{groupname}")]
+        public async Task<IActionResult> Put([FromBody] string groupname)
         {
-            await _messageRepository.UpdateGroup(group);
-            return Ok(); 
+            await _messageRepository.UpdateGroup(groupname);
+            return Ok();
         }
 
 
         [HttpGet("groups/{groupname}")]
-        public async Task<IActionResult> GetLastMessage( string groupname )
+        public async Task<IActionResult> GetLastMessage(string groupname)
         {
             return Ok(await _messageRepository.GetLastMessageOfGroup(groupname));
 

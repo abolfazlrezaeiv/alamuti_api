@@ -12,7 +12,7 @@ namespace application.Interfaces.repository
 {
     public interface IAdvertisementRepository : IRepository<Advertisement>
     {
-        Task<IEnumerable<Advertisement>> GetCurrentUserAds(IdentityUser user);
+        PagedList<Advertisement> GetCurrentUserAds(IdentityUser user, AdvertisementParameters advertisementParameters);
         PagedList<Advertisement> Search(string input, AdvertisementParameters advertisementParameters);
         PagedList<Advertisement> GetAll(string adstype, AdvertisementParameters advertisementParameters);
         PagedList<Advertisement> GetAll(AdvertisementParameters advertisementParameters);

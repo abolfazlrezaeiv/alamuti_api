@@ -7,7 +7,7 @@ namespace Domain.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public string Title { get; set; }
-        public bool IsChecked { get; set; }
+        public bool IsChecked { get; set; } 
 #nullable enable
         public string? Image { get; set; }
 #nullable disable

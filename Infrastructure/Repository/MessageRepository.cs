@@ -135,13 +135,13 @@ namespace Infrastructure.Repository
             return false;
         }
 
-        public async Task UpdateGroup(ChatGroup group)
+        public async Task UpdateGroup(string groupname)
         {
-             var groupToChange =  await _context.ChatGroups.Where(x => x.Name == group.Name).FirstAsync();
+             var groupToChange =  await _context.ChatGroups.Where(x => x.Name == groupname).FirstAsync();
 
             if (groupToChange != null)
             {
-                groupToChange.IsChecked = group.IsChecked;
+                groupToChange.IsChecked = true;
                
                 await _context.SaveChangesAsync();
             }

@@ -105,9 +105,12 @@ namespace Infrastructure.Repository
             return advertisement;
         }
 
-        public async Task<IEnumerable<Advertisement>> GetCurrentUserAds(IdentityUser user)
+        public PagedList<Advertisement> GetCurrentUserAds(IdentityUser user, AdvertisementParameters advertisementParameters)
         {
-            return await _context.Advertisements.Where(x => x.UserId == user.Id).AsNoTracking().ToListAsync();
+            return PagedList<Advertisement>
+            .ToPagedList(_context.Advertisements.Where(x => x.UserId == user.Id).AsNoTracking(),
+            advertisementParameters.PageNumber,
+            advertisementParameters.PageSize);
         }
 
         public  PagedList<Advertisement> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters)
