@@ -30,11 +30,11 @@ namespace API.Controllers
 
 
         [HttpGet("getUnpublished")]
-        public IEnumerable<AdvertisementDto> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
+        public async Task<IEnumerable<AdvertisementDto>> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
         {
 
 
-            var result = _advertisementRepository.GetAllUnpublished(advertisementParameters);
+            var result = await _advertisementRepository.GetAllUnpublished(advertisementParameters);
 
             var metadata = new
             {
@@ -54,10 +54,10 @@ namespace API.Controllers
         }
 
         [HttpGet("GetUserAdvertisementInAdminPandel/{userid}")]
-        public IEnumerable<AdvertisementDetailDto> GetUserAdvertisementInAdminPandel(string userId
+        public async Task<IEnumerable<AdvertisementDetailDto>> GetUserAdvertisementInAdminPandel(string userId
             , [FromQuery] AdvertisementParameters advertisementParameters)
         {
-            var result = _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
+            var result = await _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
 
             var metadata = new
             {
@@ -77,14 +77,14 @@ namespace API.Controllers
         }
 
         [HttpGet("filter/{adstype}")]
-        public IEnumerable<AdvertisementDto> GetAll([FromQuery] AdvertisementParameters advertisementParameters, string? adstype)
+        public async Task<IEnumerable<AdvertisementDto>> GetAll([FromQuery] AdvertisementParameters advertisementParameters, string? adstype)
         {
-            object metadata;
+
             if (string.IsNullOrWhiteSpace(adstype))
             {
-                var allAdvertisement = _advertisementRepository.GetAll(advertisementParameters);
+                var allAdvertisement = await _advertisementRepository.GetAll(advertisementParameters);
 
-                metadata = new
+                var metadata = new
                 {
                     allAdvertisement.TotalCount,
                     allAdvertisement.PageSize,
@@ -99,9 +99,9 @@ namespace API.Controllers
             }
             else
             {
-                var filteredResult = _advertisementRepository.GetAll(adstype, advertisementParameters);
+                var filteredResult = await _advertisementRepository.GetAll(adstype, advertisementParameters);
 
-                metadata = new
+                var metadata = new
                 {
                     filteredResult.TotalCount,
                     filteredResult.PageSize,
@@ -121,9 +121,9 @@ namespace API.Controllers
 
         }
         [HttpGet("search/{input}")]
-        public IActionResult Search(string input, [FromQuery] AdvertisementParameters advertisementParameters)
+        public async Task<IEnumerable<AdvertisementDto>> Search(string input, [FromQuery] AdvertisementParameters advertisementParameters)
         {
-            var searchResult = _advertisementRepository.Search(input, advertisementParameters);
+            var searchResult = await _advertisementRepository.Search(input, advertisementParameters);
 
             var metadata = new
             {
@@ -137,7 +137,7 @@ namespace API.Controllers
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
 
-            return Ok(searchResult.Select(x => _mapper.Map<AdvertisementDto>(x)));
+            return searchResult.Select(x => _mapper.Map<AdvertisementDto>(x));
         }
 
 
@@ -161,7 +161,7 @@ namespace API.Controllers
         public async Task<IEnumerable<UserAdvertisementDto>> Get([FromQuery] AdvertisementParameters advertisementParameters)
         {
             var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
-            var userAds = _advertisementRepository.GetCurrentUserAds(currentuser, advertisementParameters);
+            var userAds = await _advertisementRepository.GetCurrentUserAds(currentuser, advertisementParameters);
 
             var metadata = new
             {

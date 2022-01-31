@@ -26,6 +26,7 @@ namespace API
 
             await Clients.Group(groupNameFromClient).SendAsync("ReceiveMessage", receiverId, senderId, message, groupNameFromClient, grouptitle);
 
+
             await _repository.AddMessageToGroup(groupNameFromClient, new ChatMessage { Sender = senderId, Reciever = receiverId, DateSended = DateTime.UtcNow, Message = message, GroupName = groupNameFromClient });
 
         }

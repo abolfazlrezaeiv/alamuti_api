@@ -16,16 +16,16 @@ namespace Infrastructure.Repository
         private readonly AlamutDbContext _context;
         private readonly MessageRepository _messageRepository;
 
-        public AdvertisementRepository(AlamutDbContext context,MessageRepository messageRepository)
+        public AdvertisementRepository(AlamutDbContext context, MessageRepository messageRepository)
         {
             _context = context;
             _messageRepository = messageRepository;
         }
 
-        
+
         public async Task<Advertisement> Add(Advertisement entity)
         {
-          
+
             await _context.Advertisements.AddAsync(entity);
             await _context.SaveChangesAsync();
             return entity;
@@ -56,7 +56,7 @@ namespace Infrastructure.Repository
 
         public async Task<Advertisement> ChangeToPublished(int id)
         {
-            var advertisement = await  _context.Advertisements.FindAsync(id);
+            var advertisement = await _context.Advertisements.FindAsync(id);
             if (advertisement == null)
                 return null;
 
@@ -67,7 +67,7 @@ namespace Infrastructure.Repository
             }
 
 
-            var group = await _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
+            var group = await _context.ChatGroups.AsNoTracking().Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
 
             await _context.Messages.AddAsync(new ChatMessage() { ChatGroup = group, ChatGroupId = group.Id, Sender = "الموتی", GroupName = group.Name, Reciever = advertisement.UserId, Message = $"آگهی {advertisement.Title} منتشر شد" });
 
@@ -95,72 +95,72 @@ namespace Infrastructure.Repository
                 await _messageRepository.AddGroup(new ChatGroup() { Name = "alamuti" + advertisement.UserId, Title = "الموتی", IsChecked = false });
                 await _context.SaveChangesAsync();
             }
-            
 
-            var group = await _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
 
-            await _context.Messages.AddAsync(new ChatMessage() {ChatGroup = group , ChatGroupId = group.Id , Sender = "الموتی",GroupName = group.Name,Reciever = advertisement.UserId,Message = $"آگهی {advertisement.Title} به یکی از دلایل زیر تایید نشد :\n- مغایرت با قوانین الموتی\n- آگهی تکراری است" });
+            var group = await _context.ChatGroups.AsNoTracking().Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
+
+            await _context.Messages.AddAsync(new ChatMessage() { ChatGroup = group, ChatGroupId = group.Id, Sender = "الموتی", GroupName = group.Name, Reciever = advertisement.UserId, Message = $"آگهی {advertisement.Title} به یکی از دلایل زیر تایید نشد :\n- مغایرت با قوانین الموتی\n- آگهی تکراری است" });
             await _context.SaveChangesAsync();
 
             return advertisement;
         }
 
-        public PagedList<Advertisement> GetCurrentUserAds(IdentityUser user, AdvertisementParameters advertisementParameters)
+        public async Task<PaginatedList<Advertisement>> GetCurrentUserAds(IdentityUser user, AdvertisementParameters advertisementParameters)
         {
-            return PagedList<Advertisement>
-            .ToPagedList(_context.Advertisements.Where(x => x.UserId == user.Id).AsNoTracking(),
+            return await PaginatedList<Advertisement>
+            .CreateAsync(_context.Advertisements.AsNoTracking().Where(x => x.UserId == user.Id),
             advertisementParameters.PageNumber,
             advertisementParameters.PageSize);
         }
 
-        public  PagedList<Advertisement> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters)
+        public  async Task<PaginatedList<Advertisement>> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters)
         {
-            return PagedList<Advertisement>
-            .ToPagedList(_context.Advertisements.Where(x => x.UserId == userId && x.Published == true).AsNoTracking(),
+            return await PaginatedList<Advertisement>
+            .CreateAsync(_context.Advertisements.Where(x => x.UserId == userId && x.Published == true).AsNoTracking(),
             advertisementParameters.PageNumber,
             advertisementParameters.PageSize);
         }
 
-        public PagedList<Advertisement> Search(string input, AdvertisementParameters advertisementParameters)
+        public  async Task<PaginatedList<Advertisement>> Search(string input, AdvertisementParameters advertisementParameters)
         {
-            var searchResult =   _context.Advertisements
-                .Where(x => (x.Title.Contains(input) || x.Village.Contains(input))  && x.Published == true).AsNoTracking();
+            var searchResult = _context.Advertisements.AsNoTracking()
+                .Where(x => (x.Title.Contains(input) || x.Village.Contains(input)) && x.Published == true);
 
-            return PagedList<Advertisement>
-              .ToPagedList(searchResult,
+            return await PaginatedList<Advertisement>
+              .CreateAsync(searchResult,
               advertisementParameters.PageNumber,
               advertisementParameters.PageSize);
-           
+
         }
 
 
-        public PagedList<Advertisement> GetAll(string adsType, AdvertisementParameters advertisementParameters)
+        public async Task<PaginatedList<Advertisement>> GetAll(string adsType, AdvertisementParameters advertisementParameters)
         {
-            return PagedList<Advertisement>
-                .ToPagedList( _context.Advertisements.Where(x => x.AdsType == adsType && x.Published == true)
-                .OrderByDescending(x => x.DatePosted).AsNoTracking(),
+            return await PaginatedList<Advertisement>
+                .CreateAsync(_context.Advertisements.AsNoTracking().Where(x => x.AdsType == adsType && x.Published == true)
+                .OrderByDescending(x => x.DatePosted),
                 advertisementParameters.PageNumber,
                 advertisementParameters.PageSize);
         }
 
 
-        public PagedList<Advertisement> GetAll(AdvertisementParameters advertisementParameters)
+        public async Task<PaginatedList<Advertisement>> GetAll(AdvertisementParameters advertisementParameters)
         {
 
-            return PagedList<Advertisement>
-               .ToPagedList(_context.Advertisements.Where(x => x.Published == true)
-               .OrderByDescending(x => x.DatePosted).AsNoTracking(),
+            return await PaginatedList<Advertisement>
+               .CreateAsync(_context.Advertisements.AsNoTracking().Where(x => x.Published == true)
+               .OrderByDescending(x => x.DatePosted),
                advertisementParameters.PageNumber,
                advertisementParameters.PageSize);
         }
 
-        public PagedList<Advertisement> GetAllUnpublished(AdvertisementParameters advertisementParameters)
+        public async Task<PaginatedList<Advertisement>> GetAllUnpublished(AdvertisementParameters advertisementParameters)
         {
-            return PagedList<Advertisement>
-               .ToPagedList(_context.Advertisements
+            return await PaginatedList<Advertisement>
+               .CreateAsync(_context.Advertisements.AsNoTracking()
                    .Where(x => x.Published == false)
                    .OrderBy(x => x.DatePosted)
-                   .AsNoTracking(),
+                   ,
                advertisementParameters.PageNumber,
                advertisementParameters.PageSize);
         }
@@ -183,7 +183,7 @@ namespace Infrastructure.Repository
                 result.Published = false;
                 await _context.SaveChangesAsync();
             }
-         
+
             return advertisement;
         }
 

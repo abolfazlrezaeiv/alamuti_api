@@ -12,16 +12,13 @@ namespace application.Interfaces.repository
 {
     public interface IAdvertisementRepository : IRepository<Advertisement>
     {
-        PagedList<Advertisement> GetCurrentUserAds(IdentityUser user, AdvertisementParameters advertisementParameters);
-        PagedList<Advertisement> Search(string input, AdvertisementParameters advertisementParameters);
-        PagedList<Advertisement> GetAll(string adstype, AdvertisementParameters advertisementParameters);
-        PagedList<Advertisement> GetAll(AdvertisementParameters advertisementParameters);
-        PagedList<Advertisement> GetAllUnpublished(AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> GetCurrentUserAds(IdentityUser user, AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> Search(string input, AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> GetAll(string adstype, AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> GetAll(AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> GetAllUnpublished(AdvertisementParameters advertisementParameters);
         Task<Advertisement> ChangeToPublished(int id);
         Task<Advertisement> DeleteUnpublished(int id);
-        PagedList<Advertisement> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters);
-
-
-
+        Task<PaginatedList<Advertisement>> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters);
     }
 }

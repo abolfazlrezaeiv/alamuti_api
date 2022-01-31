@@ -2,7 +2,6 @@
 using application.DTOs.Advertisement;
 using AutoMapper;
 using Domain.Entities;
-using Microsoft.AspNetCore.Identity;
 
 namespace application.AutoMapper
 {

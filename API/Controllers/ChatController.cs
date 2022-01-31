@@ -16,27 +16,25 @@ namespace API.Controllers
     public class ChatController : ControllerBase
     {
         private readonly MessageRepository _messageRepository;
-        private readonly UserManager<IdentityUser> _userManager;
         private readonly IMapper _mapper;
 
-        public ChatController(MessageRepository messageRepository, UserManager<IdentityUser> userManager, IMapper mapper)
+        public ChatController(MessageRepository messageRepository, IMapper mapper)
         {
             _messageRepository = messageRepository;
-            _userManager = userManager;
             _mapper = mapper;
         }
 
         [HttpGet("massages")]
-        public async Task<IEnumerable<ChatMessage>> Get()
+        public  IEnumerable<ChatMessage> Get()
         {
-            return await _messageRepository.GetAllMessages();
+            return  _messageRepository.GetAllMessages();
         }
 
 
         [HttpGet("massages/{groupname}")]
-        public IEnumerable<ChatMessageDto> Get(string groupname, [FromQuery] MessageParameters messageParameters)
+        public async Task<IEnumerable<ChatMessageDto>> Get(string groupname, [FromQuery] MessageParameters messageParameters)
         {
-            var messages = _messageRepository.GetMessages(groupname, messageParameters);
+            var messages = await _messageRepository.GetMessages(groupname, messageParameters);
 
             var metadata = new
             {
@@ -54,10 +52,10 @@ namespace API.Controllers
         }
 
         [HttpGet("groupswithmessages")]
-        public IEnumerable<ChatGroupDto> GetGroupsWithMessages([FromQuery] MessageParameters messageParameters)
+        public async Task<IEnumerable<ChatGroupDto>> GetGroupsWithMessages([FromQuery] MessageParameters messageParameters)
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
-            var groups = _messageRepository.GetGroupWithMessages(userId, messageParameters);
+            var groups = await _messageRepository.GetGroupWithMessages(userId, messageParameters);
 
             var metadata = new
             {
@@ -80,7 +78,7 @@ namespace API.Controllers
         public async Task<IEnumerable<ChatGroupDto>> GetUserGroups()
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
-            var groups = await _messageRepository.GetGroups(userId);
+            var groups = _messageRepository.GetGroups(userId);
             return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
         }
 
@@ -103,7 +101,7 @@ namespace API.Controllers
         }
 
         [HttpPut("group/{groupname}")]
-        public async Task<IActionResult> Put([FromBody] string groupname)
+        public async Task<IActionResult> Put(string groupname)
         {
             await _messageRepository.UpdateGroup(groupname);
             return Ok();
