@@ -57,20 +57,30 @@ namespace Infrastructure.Repository
         public async Task<Advertisement> ChangeToPublished(int id)
         {
             var advertisement = await _context.Advertisements.FindAsync(id);
+
             if (advertisement == null)
                 return null;
 
 
-            if (await _messageRepository.UpdateGroupIsChecked("alamuti" + advertisement.UserId) != true)
+            var alamutiGroup =  _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId);
+
+            if (await alamutiGroup.CountAsync() == 0)
             {
                 await _messageRepository.AddGroup(new ChatGroup() { Name = "alamuti" + advertisement.UserId, Title = "الموتی", IsChecked = false });
             }
 
+            var alamutiExistedGroup = await _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
 
-            var group = await _context.ChatGroups.AsNoTracking().Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
-
-            await _context.Messages.AddAsync(new ChatMessage() { ChatGroup = group, ChatGroupId = group.Id, Sender = "الموتی", GroupName = group.Name, Reciever = advertisement.UserId, Message = $"آگهی {advertisement.Title} منتشر شد" });
-
+            await _messageRepository.AddMessageToGroup("alamuti" + advertisement.UserId,
+                new ChatMessage() 
+                { 
+                    ChatGroup = alamutiExistedGroup,
+                    ChatGroupId = alamutiExistedGroup.Id,
+                    Sender = "الموتی",
+                    GroupName = alamutiExistedGroup.Name,
+                    Reciever = advertisement.UserId,
+                    Message = $"آگهی {advertisement.Title} منتشر شد" 
+                });
 
             advertisement.Published = true;
 
@@ -89,17 +99,19 @@ namespace Infrastructure.Repository
                 return null;
             }
 
-            _context.Advertisements.Remove(advertisement);
-            if (await _messageRepository.UpdateGroupIsChecked("alamuti" + advertisement.UserId) != true)
+            var alamutiGroup = _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId);
+            if (await alamutiGroup.CountAsync() == 0)
             {
                 await _messageRepository.AddGroup(new ChatGroup() { Name = "alamuti" + advertisement.UserId, Title = "الموتی", IsChecked = false });
-                await _context.SaveChangesAsync();
             }
 
 
-            var group = await _context.ChatGroups.AsNoTracking().Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
+            var alamutiExistedGroup = await _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
 
-            await _context.Messages.AddAsync(new ChatMessage() { ChatGroup = group, ChatGroupId = group.Id, Sender = "الموتی", GroupName = group.Name, Reciever = advertisement.UserId, Message = $"آگهی {advertisement.Title} به یکی از دلایل زیر تایید نشد :\n- مغایرت با قوانین الموتی\n- آگهی تکراری است" });
+        
+
+            await _messageRepository.AddMessageToGroup("alamuti" + advertisement.UserId, new ChatMessage() { ChatGroup = alamutiExistedGroup, ChatGroupId = alamutiExistedGroup.Id, Sender = "الموتی", GroupName = alamutiExistedGroup.Name, Reciever = advertisement.UserId, Message = $"آگهی {advertisement.Title} به یکی از دلایل زیر تایید نشد :\n- مغایرت با قوانین الموتی\n- آگهی تکراری است" });
+            _context.Advertisements.Remove(advertisement);
             await _context.SaveChangesAsync();
 
             return advertisement;
@@ -115,8 +127,9 @@ namespace Infrastructure.Repository
 
         public  async Task<PaginatedList<Advertisement>> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters)
         {
+            var a = userId;
             return await PaginatedList<Advertisement>
-            .CreateAsync(_context.Advertisements.Where(x => x.UserId == userId && x.Published == true).AsNoTracking(),
+            .CreateAsync(_context.Advertisements.AsNoTracking().Where(x => userId == x.UserId && x.Published == true),
             advertisementParameters.PageNumber,
             advertisementParameters.PageSize);
         }
@@ -185,6 +198,42 @@ namespace Infrastructure.Repository
             }
 
             return advertisement;
+        }
+
+        public async Task<Advertisement> ReportAdvertisement(int id , string report)
+        {
+            var result = await _context.Advertisements.FindAsync(id);
+            if (result != null)
+            {
+                result.ReportMessage = report;
+                result.Published = true;
+                await _context.SaveChangesAsync();
+            }
+
+            return result;
+        }
+
+        public async Task<Advertisement> RemoveReportAdvertisement(int id)
+        {
+            var result = await _context.Advertisements.FindAsync(id);
+            if (result != null)
+            {
+                result.ReportMessage = null;
+                await _context.SaveChangesAsync();
+            }
+
+            return result;
+        }
+
+
+        public async Task<PaginatedList<Advertisement>> GetReportedAdvertisements(AdvertisementParameters advertisementParameters)
+        {
+            return await PaginatedList<Advertisement>
+                 .CreateAsync(_context.Advertisements.AsNoTracking()
+                     .Where(x => x.ReportMessage != null)
+                     .OrderBy(x => x.DatePosted),
+                 advertisementParameters.PageNumber,
+                 advertisementParameters.PageSize);
         }
 
         public async Task<IEnumerable<Advertisement>> GetAll()

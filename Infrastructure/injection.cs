@@ -17,7 +17,7 @@ namespace Infrastructure
           IConfiguration configuration)
         {
 
-            service.AddDbContextPool<AlamutDbContext>(options =>
+            service.AddDbContext<AlamutDbContext>(options =>
                             options.UseSqlServer(configuration.GetConnectionString("Alamut")));
 
            

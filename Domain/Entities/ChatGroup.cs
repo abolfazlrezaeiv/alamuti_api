@@ -11,6 +11,11 @@ namespace Domain.Entities
 #nullable enable
         public string? Image { get; set; }
 #nullable disable
-        public List<ChatMessage> Messages { get; set; }
+        public ICollection<ChatMessage> Messages { get; set; }
+
+        public ChatGroup()
+        {
+            Messages = new HashSet<ChatMessage>();
+        }
     }
 }

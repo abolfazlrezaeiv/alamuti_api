@@ -12,10 +12,12 @@ namespace Domain.Entities
         public byte[] Photo1 { get; set; }
         public byte[] Photo2 { get; set; }
         public byte[] ListViewPhoto { get; set; }
-        public DateTime DatePosted { get; set; } = DateTime.UtcNow ;
+        public DateTime DatePosted { get; set; } = DateTime.UtcNow;
         public string UserId { get; set; }
         public bool Published { get; set; } = false;
         public string Village { get; set; }
         public int? Area { get; set; }
+#nullable enable
+        public string? ReportMessage { get; set; }
     }
 }

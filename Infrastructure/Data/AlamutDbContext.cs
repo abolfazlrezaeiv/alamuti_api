@@ -22,18 +22,20 @@ namespace Infrastructure.Data
           
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
+
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("Alamut"));
+
+            base.OnConfiguring(optionsBuilder);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-       
-            modelBuilder.Entity<ChatMessage>()
-             .HasOne(p => p.ChatGroup)
-             .WithMany(b => b.Messages)
-              .HasForeignKey(p => p.ChatGroupId);
-
-            modelBuilder.Entity<ChatGroup>()
-             .Navigation(b => b.Messages)
-             .UsePropertyAccessMode(PropertyAccessMode.Property);
-
             base.OnModelCreating(modelBuilder);
         }
 
@@ -41,28 +43,6 @@ namespace Infrastructure.Data
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<ChatMessage> Messages{ get; set; }
         public  DbSet<ChatGroup>  ChatGroups { get; set; }
-    }
-
-    public class AlamutDbContextFactory : IDesignTimeDbContextFactory<AlamutDbContext>
-    {
-       
-
-        AlamutDbContext IDesignTimeDbContextFactory<AlamutDbContext>.CreateDbContext(string[] args)
-        {
-          
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-             .SetBasePath(Directory.GetCurrentDirectory())
-             .AddJsonFile("appsettings.json")
-             .Build();
-            var optionsBuilder = new DbContextOptionsBuilder<AlamutDbContext>();
-
-         
-            var connectionString = configuration.GetConnectionString("Alamut");
-
-            optionsBuilder.UseSqlServer(connectionString);
-
-            return new AlamutDbContext(optionsBuilder.Options);
-        }
     }
 }
 

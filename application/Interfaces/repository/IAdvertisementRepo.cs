@@ -20,5 +20,8 @@ namespace application.Interfaces.repository
         Task<Advertisement> ChangeToPublished(int id);
         Task<Advertisement> DeleteUnpublished(int id);
         Task<PaginatedList<Advertisement>> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters);
+        Task<Advertisement> ReportAdvertisement(int id,string message);
+        Task<Advertisement> RemoveReportAdvertisement(int id);
+        Task<PaginatedList<Advertisement>> GetReportedAdvertisements(AdvertisementParameters advertisementParameters);
     }
 }

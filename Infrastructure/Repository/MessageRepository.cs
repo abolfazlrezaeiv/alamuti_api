@@ -110,7 +110,7 @@ namespace Infrastructure.Repository
 
         public IEnumerable<ChatGroup> GetGroups(string userId)
         {
-            return _context.ChatGroups.AsNoTracking()
+            return  _context.ChatGroups.AsNoTracking()
                 .Include(b => b.Messages.OrderBy(x => x.DateSended))
                 .Where(x => x.Name.Contains(userId) && x.Messages.Count != 0)
                 .OrderByDescending(x => x.Messages.OrderBy(x => x.DateSended).Last().DateSended);

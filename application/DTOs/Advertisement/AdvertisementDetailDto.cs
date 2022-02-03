@@ -20,6 +20,8 @@ namespace application.DTOs.Advertisement
         public string PhoneNumber { get; set; }
         public string Village { get; set; }
         public int? Area { get; set; }
+        public string? ReportMessage { get; set; }
+
         private string persianDateForView;
         public string DaySended
         {

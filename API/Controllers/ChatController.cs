@@ -75,10 +75,10 @@ namespace API.Controllers
 
 
         [HttpGet("groups")]
-        public async Task<IEnumerable<ChatGroupDto>> GetUserGroups()
+        public  IEnumerable<ChatGroupDto> GetUserGroups()
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
-            var groups = _messageRepository.GetGroups(userId);
+            var groups =  _messageRepository.GetGroups(userId);
             return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
         }
 

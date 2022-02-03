@@ -53,9 +53,9 @@ namespace API.Controllers
 
         }
 
-        [HttpGet("GetUserAdvertisementInAdminPandel/{userid}")]
-        public async Task<IEnumerable<AdvertisementDetailDto>> GetUserAdvertisementInAdminPandel(string userId
-            , [FromQuery] AdvertisementParameters advertisementParameters)
+        [HttpGet("adminpaneluseradvertisement")]
+        public async Task<IEnumerable<AdvertisementDto>> GetUserAdvertisementInAdminPandel([FromQuery]string userId,[FromQuery] AdvertisementParameters advertisementParameters
+            )
         {
             var result = await _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
 
@@ -71,7 +71,7 @@ namespace API.Controllers
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
 
-            return result.Select(x => _mapper.Map<AdvertisementDetailDto>(x));
+            return result.Select(x => _mapper.Map<AdvertisementDto>(x));
 
 
         }
@@ -151,6 +151,34 @@ namespace API.Controllers
 
         [HttpPut("changeToPublished/{id}")]
         public async Task<Advertisement> ChangeToPublished(int id) => await _advertisementRepository.ChangeToPublished(id);
+
+        [HttpPut("report")]
+        public async Task<Advertisement> ReportAdvertisement([FromForm] int id, [FromForm] string message) => await _advertisementRepository.ReportAdvertisement(id,message);
+
+
+        [HttpPut("report/{id}")]
+        public async Task<Advertisement> RemoveReportAdvertisement(int id) => await _advertisementRepository.RemoveReportAdvertisement(id);
+
+        [HttpGet("report")]
+        public async Task<IEnumerable<AdvertisementDetailDto>> GetReports([FromQuery]AdvertisementParameters advertisementParameters)
+        {
+          
+            var reports = await _advertisementRepository.GetReportedAdvertisements(advertisementParameters);
+
+            var metadata = new
+            {
+                reports.TotalCount,
+                reports.PageSize,
+                reports.CurrentPage,
+                reports.TotalPages,
+                reports.HasNext,
+                reports.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            return reports.Select(x => _mapper.Map<AdvertisementDetailDto>(x));
+        }
 
 
         [HttpDelete("unPublished/{id}")]
