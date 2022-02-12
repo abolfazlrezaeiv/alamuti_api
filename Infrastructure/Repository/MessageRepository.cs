@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repository
 {
-    public class MessageRepository 
+    public class MessageRepository
     {
         private readonly AlamutDbContext _context;
 
@@ -20,12 +20,30 @@ namespace Infrastructure.Repository
 
         public async Task AddGroup(ChatGroup group)
         {
-            var existedChatGroup =  _context.ChatGroups.AsNoTracking().Where(x=> x.Name == group.Name);
-            if (await existedChatGroup.CountAsync()  == 0)
+            var existedChatGroup = _context.ChatGroups.AsNoTracking().Where(x => x.Name == group.Name);
+            if (await existedChatGroup.AnyAsync() == false)
             {
                 await _context.ChatGroups.AddAsync(group);
                 await _context.SaveChangesAsync();
             }
+        }
+
+
+        public async Task<ChatGroup> GetGroup(string groupname)
+        {
+         
+                var existedChatGroup =  _context.ChatGroups.AsNoTracking().Where(x => x.Name == groupname);
+
+                if (await existedChatGroup.AnyAsync() == false)
+                {
+                    return null;
+                }
+
+                return await existedChatGroup.FirstAsync();
+         
+          
+          
+
         }
 
         public async Task Add(ChatMessage entity)
@@ -34,20 +52,20 @@ namespace Infrastructure.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ChatMessage> AddMessageToGroup(string groupName,ChatMessage message)
+        public async Task<ChatMessage> AddMessageToGroup(string groupName, ChatMessage message)
         {
-            var availableGroup = await  _context.ChatGroups.Where(x => x.Name == groupName ).FirstAsync();
-         
+            var availableGroup = await _context.ChatGroups.Where(x => x.Name == groupName).FirstAsync();
+
             availableGroup.IsChecked = false;
-                
+
             await _context.SaveChangesAsync();
 
-            await _context.Messages.AddAsync(new ChatMessage() 
-            { 
+            await _context.Messages.AddAsync(new ChatMessage()
+            {
                 Sender = message.Sender,
                 Message = message.Message,
                 ChatGroup = availableGroup,
-                ChatGroupId= availableGroup.Id,
+                ChatGroupId = availableGroup.Id,
                 Reciever = message.Reciever,
                 GroupName = groupName,
                 DateSended = message.DateSended
@@ -62,7 +80,7 @@ namespace Infrastructure.Repository
         }
 
 
-        public  async Task<PaginatedList<ChatMessage>> GetMessages(string groupName, MessageParameters messageParameters)
+        public async Task<PaginatedList<ChatMessage>> GetMessages(string groupName, MessageParameters messageParameters)
         {
             return await PaginatedList<ChatMessage>
                 .CreateAsync(
@@ -72,34 +90,43 @@ namespace Infrastructure.Repository
                messageParameters.PageSize);
         }
 
-
-        public async Task<ChatMessage> GetLastMessageOfGroup (string groupName)
+        public async Task<ChatGroup> ReportChat(string groupName, string blockedUserId, string report)
         {
-            return await _context.Messages.AsNoTracking().Where(x => x.GroupName == groupName).OrderBy(x=>x.DateSended).LastAsync();
+            var result = await _context.ChatGroups.Where(x => x.Name == groupName).ToListAsync();
+            if (result.Count != 0)
+            {
+                result.First().ReportMessage = report;
+                result.First().IsDeleted = true;
+                result.First().BlockedUserId = blockedUserId;
+                await _context.SaveChangesAsync();
+            }
+            return result.First();
+        }
+
+        public async Task<ChatMessage> GetLastMessageOfGroup(string groupName)
+        {
+            return await _context.Messages.AsNoTracking().Where(x => x.GroupName == groupName).OrderBy(x => x.DateSended).LastAsync();
         }
 
 
         public async Task DeleteGroup(string groupName)
         {
 
-            var group = await _context.ChatGroups.Include(x => x.Messages).AsNoTracking().Where(x => x.Name == groupName).FirstAsync();
-            if (group != null)
-            {
-                _context.ChatGroups.Remove(group);
-                var messages = _context.Messages.Where(x => x.GroupName == group.Name).AsNoTracking();
-                _context.Messages.RemoveRange(messages);
-                await _context.SaveChangesAsync();
-            }
+            var group = await _context.ChatGroups.Include(x => x.Messages).Where(x => x.Name == groupName).FirstAsync();
+
+            group.IsDeleted = true;
+            await _context.SaveChangesAsync();
+
         }
 
-       
+
         public async Task<PaginatedList<ChatGroup>> GetGroupWithMessages(string userId, MessageParameters messageParameters)
         {
             return await PaginatedList<ChatGroup>
               .CreateAsync(
               _context.ChatGroups.AsNoTracking()
                 .Include(b => b.Messages.AsQueryable().OrderBy(x => x.DateSended).AsNoTracking())
-                .Where(x => x.Name.Contains(userId) && x.Messages.Count != 0)
+                .Where(x => x.Name.Contains(userId) && x.Messages.Count != 0 && x.IsDeleted == false)
                 .OrderByDescending(x => x.Messages.OrderBy(x => x.DateSended).Last().DateSended)
                 ,
              messageParameters.PageNumber,
@@ -110,21 +137,19 @@ namespace Infrastructure.Repository
 
         public IEnumerable<ChatGroup> GetGroups(string userId)
         {
-            return  _context.ChatGroups.AsNoTracking()
+            return _context.ChatGroups.AsNoTracking()
                 .Include(b => b.Messages.OrderBy(x => x.DateSended))
-                .Where(x => x.Name.Contains(userId) && x.Messages.Count != 0)
+                .Where(x => x.Name.Contains(userId) && x.Messages.Count > 0 && x.IsDeleted == false)
                 .OrderByDescending(x => x.Messages.OrderBy(x => x.DateSended).Last().DateSended);
-
-
         }
 
 
 
         public async Task<bool> UpdateGroupIsChecked(string groupname)
         {
-            var group =  _context.ChatGroups.Where(x => x.Name == groupname);
+            var group = _context.ChatGroups.Where(x => x.Name == groupname);
 
-           
+
             if (await group.CountAsync() != 0)
             {
                 group.First().IsChecked = false;
@@ -137,12 +162,12 @@ namespace Infrastructure.Repository
 
         public async Task UpdateGroup(string groupname)
         {
-             var groupToChange =  await   _context.ChatGroups.Where(x => x.Name == groupname).FirstAsync();
+            var groupToChange = await _context.ChatGroups.Where(x => x.Name == groupname).FirstAsync();
 
             if (groupToChange != null)
             {
                 groupToChange.IsChecked = true;
-               
+
                 await _context.SaveChangesAsync();
             }
         }

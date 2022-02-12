@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0" />
     <PackageReference Include="RestSharp" Version="107.1.1" />
+    <PackageReference Include="SmsIrRestfulNetCore" Version="1.1.4" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.2.3" />

@@ -3,9 +3,9 @@ using RestSharp;
 
 namespace application.Services
 {
-    public class OTPServices : IOTPSevice
+    public class GhasedakOTPService : IOTPSevice
     {
-        public OTPServices()
+        public GhasedakOTPService()
         {
 
         }

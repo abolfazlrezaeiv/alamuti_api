@@ -196,7 +196,6 @@ namespace Infrastructure.Repository
                 result.Published = false;
                 await _context.SaveChangesAsync();
             }
-
             return advertisement;
         }
 

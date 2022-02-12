@@ -15,7 +15,7 @@ namespace application
              IConfiguration configuration)
         {
             service.AddAutoMapper(typeof(AdvertisementProfile),typeof(ChatProfile));
-            service.AddScoped<IOTPSevice , OTPServices>();
+            service.AddScoped<IOTPSevice , SmsIrOTPService>();
             return service;
         }
     }

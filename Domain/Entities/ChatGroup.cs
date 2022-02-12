@@ -10,8 +10,12 @@ namespace Domain.Entities
         public bool IsChecked { get; set; } 
 #nullable enable
         public string? Image { get; set; }
+        public string? ReportMessage { get; set; }
+        public string? BlockedUserId { get; set; }
+
 #nullable disable
         public ICollection<ChatMessage> Messages { get; set; }
+        public bool IsDeleted { get; set; }
 
         public ChatGroup()
         {

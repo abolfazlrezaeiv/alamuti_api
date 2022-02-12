@@ -30,6 +30,11 @@ namespace API.Controllers
             return  _messageRepository.GetAllMessages();
         }
 
+        [HttpGet("group/{groupname}")]
+        public async Task<ChatGroup> Get(string groupname)
+        {
+            return await _messageRepository.GetGroup(groupname);
+        }
 
         [HttpGet("massages/{groupname}")]
         public async Task<IEnumerable<ChatMessageDto>> Get(string groupname, [FromQuery] MessageParameters messageParameters)
@@ -104,6 +109,13 @@ namespace API.Controllers
         public async Task<IActionResult> Put(string groupname)
         {
             await _messageRepository.UpdateGroup(groupname);
+            return Ok();
+        }
+
+        [HttpPut("reportgroup")]
+        public async Task<IActionResult> ReportChat([FromForm] string groupname, [FromForm]  string blockedUserId, [FromForm] string reportMessage)
+        {
+            await _messageRepository.ReportChat(groupname, blockedUserId, reportMessage);
             return Ok();
         }
 

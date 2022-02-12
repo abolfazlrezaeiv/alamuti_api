@@ -21,14 +21,24 @@ namespace API
         {
 
             //var groupnameFirstTime = $"{receiverId + senderId + grouptitle}";
-
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupNameFromClient);
-
-            await Clients.Group(groupNameFromClient).SendAsync("ReceiveMessage", receiverId, senderId, message, groupNameFromClient, grouptitle);
+            var group = await _repository.GetGroup(groupNameFromClient);
 
 
-            await _repository.AddMessageToGroup(groupNameFromClient, new ChatMessage { Sender = senderId, Reciever = receiverId, DateSended = DateTime.UtcNow, Message = message, GroupName = groupNameFromClient });
+            if (group.IsDeleted == false)
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, groupNameFromClient);
 
+                await Clients.Group(groupNameFromClient).SendAsync("ReceiveMessage", receiverId, senderId, message, groupNameFromClient, grouptitle);
+
+                await _repository.AddMessageToGroup(groupNameFromClient, new ChatMessage
+                {
+                    Sender = senderId,
+                    Reciever = receiverId,
+                    DateSended = DateTime.UtcNow,
+                    Message = message,
+                    GroupName = groupNameFromClient
+                });
+            }
         }
 
         public async Task InitializeChat(string receiverId, string senderId, string? groupNameFromClient, string grouptitle, string? groupImage)
