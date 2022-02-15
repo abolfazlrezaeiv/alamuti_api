@@ -193,6 +193,8 @@ namespace Infrastructure.Repository
                 result.Photo1 = advertisement.Photo1;
                 result.Photo2 = advertisement.Photo2;
                 result.ListViewPhoto = advertisement.ListViewPhoto;
+                result.Area = advertisement.Area;
+                result.Village = advertisement.Village;
                 result.Published = false;
                 await _context.SaveChangesAsync();
             }
