@@ -12,9 +12,9 @@ namespace application.Interfaces.repository
     {
         Task<IEnumerable<IEntity>> GetAll();
         Task<IEntity> Get(int id);
-        Task<IEntity> Add(IEntity entity);
-        Task<IEntity> Update(IEntity entity);
-        Task<IEntity> Delete(IEntity entity);
+        Task Add(IEntity entity);
+        Task Update(IEntity entity);
+        Task Delete(IEntity entity);
 
     }
 }

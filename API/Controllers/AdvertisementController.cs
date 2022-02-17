@@ -99,7 +99,7 @@ namespace API.Controllers
             }
             else
             {
-                var filteredResult = await _advertisementRepository.GetAll(adstype, advertisementParameters);
+                var filteredResult = await _advertisementRepository.GetByFilter(adstype, advertisementParameters);
 
                 var metadata = new
                 {
@@ -150,14 +150,14 @@ namespace API.Controllers
 
 
         [HttpPut("changeToPublished/{id}")]
-        public async Task<Advertisement> ChangeToPublished(int id) => await _advertisementRepository.ChangeToPublished(id);
+        public async Task ChangeToPublished(int id) => await _advertisementRepository.ChangeToPublished(id);
 
         [HttpPut("report")]
-        public async Task<Advertisement> ReportAdvertisement([FromForm] int id, [FromForm] string message) => await _advertisementRepository.ReportAdvertisement(id,message);
+        public async Task ReportAdvertisement([FromForm] int id, [FromForm] string message) => await _advertisementRepository.ReportAdvertisement(id,message);
 
 
         [HttpPut("report/{id}")]
-        public async Task<Advertisement> RemoveReportAdvertisement(int id) => await _advertisementRepository.RemoveReportAdvertisement(id);
+        public async Task RemoveReportAdvertisement(int id) => await _advertisementRepository.RemoveReportAdvertisement(id);
 
         [HttpGet("report")]
         public async Task<IEnumerable<AdvertisementDetailDto>> GetReports([FromQuery]AdvertisementParameters advertisementParameters)
@@ -182,7 +182,7 @@ namespace API.Controllers
 
 
         [HttpDelete("unPublished/{id}")]
-        public async Task<Advertisement> DeleteUnpublished(int id) => await _advertisementRepository.DeleteUnpublished(id);
+        public async Task DeleteUnpublished(int id) => await _advertisementRepository.DeleteUnpublished(id);
 
 
         [HttpGet("useradvertisement")]
@@ -207,13 +207,13 @@ namespace API.Controllers
         }
 
         [HttpPost]
-        public async Task<Advertisement> Post([FromForm] Advertisement advertisement)
+        public async Task Post([FromForm] Advertisement advertisement)
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
 
             advertisement.UserId = userId;
 
-            return await _advertisementRepository.Add(advertisement);
+            await _advertisementRepository.Add(advertisement);
         }
 
 

@@ -9,7 +9,7 @@ namespace application.Services
     public class SmsIrOTPService : IOTPSevice
     {
 
-        public async void SendMessage(string phonenumber, int code)
+        public void SendMessage(string phonenumber, int code)
         {
             Token tk = new();
             string token = tk.GetToken("8449d52edcd7eab89db7d531", "it66)%#teBC!@*&");
@@ -31,13 +31,6 @@ namespace application.Services
             };
 
             new UltraFast().Send(token, ultraFastSend);
-
-
-
-
-
         }
-
-
     }
 }

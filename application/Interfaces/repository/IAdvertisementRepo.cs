@@ -14,14 +14,14 @@ namespace application.Interfaces.repository
     {
         Task<PaginatedList<Advertisement>> GetCurrentUserAds(IdentityUser user, AdvertisementParameters advertisementParameters);
         Task<PaginatedList<Advertisement>> Search(string input, AdvertisementParameters advertisementParameters);
-        Task<PaginatedList<Advertisement>> GetAll(string adstype, AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> GetByFilter(string adstype, AdvertisementParameters advertisementParameters);
         Task<PaginatedList<Advertisement>> GetAll(AdvertisementParameters advertisementParameters);
         Task<PaginatedList<Advertisement>> GetAllUnpublished(AdvertisementParameters advertisementParameters);
-        Task<Advertisement> ChangeToPublished(int id);
-        Task<Advertisement> DeleteUnpublished(int id);
+        Task ChangeToPublished(int id);
+        Task DeleteUnpublished(int id);
         Task<PaginatedList<Advertisement>> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters);
-        Task<Advertisement> ReportAdvertisement(int id,string message);
-        Task<Advertisement> RemoveReportAdvertisement(int id);
+        Task ReportAdvertisement(int id,string message);
+        Task RemoveReportAdvertisement(int id);
         Task<PaginatedList<Advertisement>> GetReportedAdvertisements(AdvertisementParameters advertisementParameters);
     }
 }

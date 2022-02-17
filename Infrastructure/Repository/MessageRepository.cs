@@ -18,7 +18,7 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
-        public async Task AddGroup(ChatGroup group)
+        public async Task AddChatGroup(ChatGroup group)
         {
             var existedChatGroup = _context.ChatGroups.AsNoTracking().Where(x => x.Name == group.Name);
             if (await existedChatGroup.AnyAsync() == false)
@@ -29,7 +29,7 @@ namespace Infrastructure.Repository
         }
 
 
-        public async Task<ChatGroup> GetGroup(string groupname)
+        public async Task<ChatGroup> GetGroupByGroupName(string groupname)
         {
          
                 var existedChatGroup =  _context.ChatGroups.AsNoTracking().Where(x => x.Name == groupname);
@@ -38,27 +38,22 @@ namespace Infrastructure.Repository
                 {
                     return null;
                 }
-
                 return await existedChatGroup.FirstAsync();
-         
-          
-          
-
         }
 
-        public async Task Add(ChatMessage entity)
-        {
-            await _context.Messages.AddAsync(entity);
-            await _context.SaveChangesAsync();
-        }
+        //public async Task Add(ChatMessage entity)
+        //{
+        //    await _context.Messages.AddAsync(entity);
+        //    await _context.SaveChangesAsync();
+        //}
 
-        public async Task<ChatMessage> AddMessageToGroup(string groupName, ChatMessage message)
+        public async Task AddChatMessage(string groupName, ChatMessage message)
         {
             var availableGroup = await _context.ChatGroups.Where(x => x.Name == groupName).FirstAsync();
 
             availableGroup.IsChecked = false;
 
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
 
             await _context.Messages.AddAsync(new ChatMessage()
             {
@@ -71,13 +66,9 @@ namespace Infrastructure.Repository
                 DateSended = message.DateSended
             });
             await _context.SaveChangesAsync();
-            return message;
         }
 
-        public IEnumerable<ChatMessage> GetAllMessages()
-        {
-            return _context.Messages.AsNoTracking();
-        }
+
 
 
         public async Task<PaginatedList<ChatMessage>> GetMessages(string groupName, MessageParameters messageParameters)
@@ -90,7 +81,7 @@ namespace Infrastructure.Repository
                messageParameters.PageSize);
         }
 
-        public async Task<ChatGroup> ReportChat(string groupName, string blockedUserId, string report)
+        public async Task ReportChat(string groupName, string blockedUserId, string report)
         {
             var result = await _context.ChatGroups.Where(x => x.Name == groupName).ToListAsync();
             if (result.Count != 0)
@@ -99,24 +90,21 @@ namespace Infrastructure.Repository
                 result.First().IsDeleted = true;
                 result.First().BlockedUserId = blockedUserId;
                 await _context.SaveChangesAsync();
-            }
-            return result.First();
+            }  
         }
 
-        public async Task<ChatMessage> GetLastMessageOfGroup(string groupName)
-        {
-            return await _context.Messages.AsNoTracking().Where(x => x.GroupName == groupName).OrderBy(x => x.DateSended).LastAsync();
-        }
+        //public async Task<ChatMessage> GetLastMessageOfGroup(string groupName)
+        //{
+        //    return await _context.Messages.AsNoTracking().Where(x => x.GroupName == groupName).OrderBy(x => x.DateSended).LastAsync();
+        //}
 
 
         public async Task DeleteGroup(string groupName)
         {
-
-            var group = await _context.ChatGroups.Include(x => x.Messages).Where(x => x.Name == groupName).FirstAsync();
+            var group = await _context.ChatGroups.Where(x => x.Name == groupName).FirstAsync();
 
             group.IsDeleted = true;
             await _context.SaveChangesAsync();
-
         }
 
 
@@ -127,15 +115,13 @@ namespace Infrastructure.Repository
               _context.ChatGroups.AsNoTracking()
                 .Include(b => b.Messages.AsQueryable().OrderBy(x => x.DateSended).AsNoTracking())
                 .Where(x => x.Name.Contains(userId) && x.Messages.Count != 0 && x.IsDeleted == false)
-                .OrderByDescending(x => x.Messages.OrderBy(x => x.DateSended).Last().DateSended)
-                ,
+                .OrderByDescending(x => x.Messages.OrderBy(x => x.DateSended).Last().DateSended),
              messageParameters.PageNumber,
              messageParameters.PageSize);
-
         }
 
 
-        public IEnumerable<ChatGroup> GetGroups(string userId)
+        public IEnumerable<ChatGroup> GetAllGroupsNoPagination(string userId)
         {
             return _context.ChatGroups.AsNoTracking()
                 .Include(b => b.Messages.OrderBy(x => x.DateSended))
@@ -145,10 +131,9 @@ namespace Infrastructure.Repository
 
 
 
-        public async Task<bool> UpdateGroupIsChecked(string groupname)
+        public async Task<bool> UpdateGroupCheckedStatus(string groupname)
         {
             var group = _context.ChatGroups.Where(x => x.Name == groupname);
-
 
             if (await group.CountAsync() != 0)
             {

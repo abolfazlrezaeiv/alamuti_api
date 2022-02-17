@@ -24,16 +24,12 @@ namespace API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("massages")]
-        public  IEnumerable<ChatMessage> Get()
-        {
-            return  _messageRepository.GetAllMessages();
-        }
+       
 
         [HttpGet("group/{groupname}")]
         public async Task<ChatGroup> Get(string groupname)
         {
-            return await _messageRepository.GetGroup(groupname);
+            return await _messageRepository.GetGroupByGroupName(groupname);
         }
 
         [HttpGet("massages/{groupname}")]
@@ -83,7 +79,7 @@ namespace API.Controllers
         public  IEnumerable<ChatGroupDto> GetUserGroups()
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
-            var groups =  _messageRepository.GetGroups(userId);
+            var groups =  _messageRepository.GetAllGroupsNoPagination(userId);
             return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
         }
 
@@ -99,10 +95,9 @@ namespace API.Controllers
 
 
         [HttpPost("addgroup")]
-        public async Task<IActionResult> Post([FromForm] ChatGroup group)
+        public async void Post([FromForm] ChatGroup group)
         {
-            await _messageRepository.AddGroup(group);
-            return Ok();
+            await _messageRepository.AddChatGroup(group);
         }
 
         [HttpPut("group/{groupname}")]
@@ -120,19 +115,19 @@ namespace API.Controllers
         }
 
 
-        [HttpGet("groups/{groupname}")]
-        public async Task<IActionResult> GetLastMessage(string groupname)
-        {
-            return Ok(await _messageRepository.GetLastMessageOfGroup(groupname));
+        //[HttpGet("groups/{groupname}")]
+        //public async Task<IActionResult> GetLastMessage(string groupname)
+        //{
+        //    return Ok(await _messageRepository.GetLastMessageOfGroup(groupname));
 
-        }
+        //}
 
 
-        [HttpPost()]
-        public async Task<IActionResult> Post([FromBody] ChatMessage message)
-        {
-            await _messageRepository.Add(message);
-            return Ok();
-        }
+        //[HttpPost()]
+        //public async Task<IActionResult> Post([FromBody] ChatMessage message)
+        //{
+        //    await _messageRepository.Add(message);
+        //    return Ok();
+        //}
     }
 }
