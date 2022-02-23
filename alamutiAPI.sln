@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alamuti.Infrastructure", "Infrastructure\Alamuti.Infrastructure.csproj", "{5334B5BA-E7BD-42B3-A44B-C03DB682A4BB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{10FAC36C-1675-4322-878F-94EA3155AB7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alamuti.Domain", "Domain\Alamuti.Domain.csproj", "{10FAC36C-1675-4322-878F-94EA3155AB7A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "application", "application\application.csproj", "{DA91043A-7525-48E9-A7B2-83797418BB0B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alamuti.Application", "application\Alamuti.Application.csproj", "{DA91043A-7525-48E9-A7B2-83797418BB0B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API", "API\API.csproj", "{18A702C7-5063-4111-B5BB-1C4637651586}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alamuti.API", "API\Alamuti.API.csproj", "{18A702C7-5063-4111-B5BB-1C4637651586}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -10,10 +10,10 @@ using Newtonsoft.Json;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/chat")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class ChatController : ControllerBase
+    public class ChatController : BaseController
     {
         private readonly MessageRepository _messageRepository;
         private readonly IMapper _mapper;
@@ -26,108 +26,67 @@ namespace API.Controllers
 
        
 
-        [HttpGet("group/{groupname}")]
-        public async Task<ChatGroup> Get(string groupname)
+        [HttpGet("groups/{groupname}")]
+        public async Task<ChatGroup> GetGroupByName(string groupname)
         {
-            return await _messageRepository.GetGroupByGroupName(groupname);
+            return await _messageRepository.GetGroupByName(groupname);
         }
 
-        [HttpGet("massages/{groupname}")]
-        public async Task<IEnumerable<ChatMessageDto>> Get(string groupname, [FromQuery] MessageParameters messageParameters)
+        [HttpGet("groups/{groupname}/messages")]
+        public async Task<IEnumerable<ChatMessageDto>> GetMessages(string groupname, [FromQuery] MessageParameters messageParameters)
         {
             var messages = await _messageRepository.GetMessages(groupname, messageParameters);
 
-            var metadata = new
-            {
-                messages.TotalCount,
-                messages.PageSize,
-                messages.CurrentPage,
-                messages.TotalPages,
-                messages.HasNext,
-                messages.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            AddHeaderPagination(messages);
 
             return messages.Select(x => _mapper.Map<ChatMessageDto>(x));
         }
 
-        [HttpGet("groupswithmessages")]
-        public async Task<IEnumerable<ChatGroupDto>> GetGroupsWithMessages([FromQuery] MessageParameters messageParameters)
-        {
-            var userId = User.Claims.FirstOrDefault()?.Value;
-            var groups = await _messageRepository.GetGroupWithMessages(userId, messageParameters);
-
-            var metadata = new
-            {
-                groups.TotalCount,
-                groups.PageSize,
-                groups.CurrentPage,
-                groups.TotalPages,
-                groups.HasNext,
-                groups.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-            return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
-        }
-
-
-
         [HttpGet("groups")]
-        public  IEnumerable<ChatGroupDto> GetUserGroups()
+        public async Task<IEnumerable<ChatGroupDto>> GetGroups([FromQuery] MessageParameters messageParameters)
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
-            var groups =  _messageRepository.GetAllGroupsNoPagination(userId);
+            var groups = await _messageRepository.GetGroups(userId, messageParameters);
+
+            AddHeaderPagination(groups);
+
             return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
         }
 
 
-        [HttpDelete("group/{groupname}")]
-        public async Task<IActionResult> DeleteGroup(string groupname)
+
+        [HttpGet("groups/no-paginated")]
+        public  IEnumerable<ChatGroupDto> GetAllGroups()
+        {
+            var userId = User.Claims.FirstOrDefault()?.Value;
+            var groups =  _messageRepository.GetGroupsNoPagination(userId);
+            return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
+        }
+
+
+        [HttpDelete("groups/{groupname}")]
+        public async Task Delete(string groupname)
         {
             await _messageRepository.DeleteGroup(groupname);
-            return Ok();
-
         }
 
 
-
-        [HttpPost("addgroup")]
-        public async void Post([FromForm] ChatGroup group)
+        [HttpPost("groups")]
+        public async void Insert([FromForm] ChatGroup group)
         {
-            await _messageRepository.AddChatGroup(group);
+            await _messageRepository.AddGroup(group);
         }
 
-        [HttpPut("group/{groupname}")]
-        public async Task<IActionResult> Put(string groupname)
+        [HttpPut("groups/{groupname}")]
+        public async Task Update(string groupname)
         {
-            await _messageRepository.UpdateGroup(groupname);
-            return Ok();
+            await _messageRepository.ConvertGroupToChecked(groupname);
         }
 
-        [HttpPut("reportgroup")]
-        public async Task<IActionResult> ReportChat([FromForm] string groupname, [FromForm]  string blockedUserId, [FromForm] string reportMessage)
+        [HttpPut("groups/report")]
+        public async Task ReportChat([FromForm] string groupname, [FromForm]  string blockedUserId, [FromForm] string reportMessage)
         {
             await _messageRepository.ReportChat(groupname, blockedUserId, reportMessage);
-            return Ok();
         }
-
-
-        //[HttpGet("groups/{groupname}")]
-        //public async Task<IActionResult> GetLastMessage(string groupname)
-        //{
-        //    return Ok(await _messageRepository.GetLastMessageOfGroup(groupname));
-
-        //}
-
-
-        //[HttpPost()]
-        //public async Task<IActionResult> Post([FromBody] ChatMessage message)
-        //{
-        //    await _messageRepository.Add(message);
-        //    return Ok();
-        //}
     }
 }

@@ -7,204 +7,92 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/advertisement")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public class AdvertisementController : ControllerBase
+    public class AdvertisementController : BaseController
     {
         private readonly IAdvertisementRepository _advertisementRepository;
-        private readonly UserManager<IdentityUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public AdvertisementController(IAdvertisementRepository advertisementRepository, UserManager<IdentityUser> userManager, IMapper mapper)
+
+        public AdvertisementController(IAdvertisementRepository advertisementRepository, IMapper mapper, UserManager<IdentityUser> userManager)
         {
             _advertisementRepository = advertisementRepository;
-            _userManager = userManager;
             _mapper = mapper;
-        }
-
-
-        [HttpGet("getUnpublished")]
-        public async Task<IEnumerable<AdvertisementDto>> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
-        {
-
-
-            var result = await _advertisementRepository.GetAllUnpublished(advertisementParameters);
-
-            var metadata = new
-            {
-                result.TotalCount,
-                result.PageSize,
-                result.CurrentPage,
-                result.TotalPages,
-                result.HasNext,
-                result.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-            return result.Select(x => _mapper.Map<AdvertisementDto>(x));
+            _userManager = userManager;
 
 
         }
 
-        [HttpGet("adminpaneluseradvertisement")]
-        public async Task<IEnumerable<AdvertisementDto>> GetUserAdvertisementInAdminPandel([FromQuery]string userId,[FromQuery] AdvertisementParameters advertisementParameters
-            )
+
+        [AllowAnonymous]
+        [HttpGet("index/{category}")]
+        public async Task<IEnumerable<AdvertisementDto>> Index([FromQuery] AdvertisementParameters advertisementParameters, string? category)
         {
-            var result = await _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
-
-            var metadata = new
-            {
-                result.TotalCount,
-                result.PageSize,
-                result.CurrentPage,
-                result.TotalPages,
-                result.HasNext,
-                result.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-            return result.Select(x => _mapper.Map<AdvertisementDto>(x));
-
-
-        }
-
-        [HttpGet("filter/{adstype}")]
-        public async Task<IEnumerable<AdvertisementDto>> GetAll([FromQuery] AdvertisementParameters advertisementParameters, string? adstype)
-        {
-
-            if (string.IsNullOrWhiteSpace(adstype))
+            if (string.IsNullOrWhiteSpace(category))
             {
                 var allAdvertisement = await _advertisementRepository.GetAll(advertisementParameters);
 
-                var metadata = new
-                {
-                    allAdvertisement.TotalCount,
-                    allAdvertisement.PageSize,
-                    allAdvertisement.CurrentPage,
-                    allAdvertisement.TotalPages,
-                    allAdvertisement.HasNext,
-                    allAdvertisement.HasPrevious
-                };
+                AddHeaderPagination(allAdvertisement);
 
-                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
                 return allAdvertisement.Select(x => _mapper.Map<AdvertisementDto>(x));
             }
             else
             {
-                var filteredResult = await _advertisementRepository.GetByFilter(adstype, advertisementParameters);
+                var filteredResult = await _advertisementRepository.GetByFilter(category, advertisementParameters);
 
-                var metadata = new
-                {
-                    filteredResult.TotalCount,
-                    filteredResult.PageSize,
-                    filteredResult.CurrentPage,
-                    filteredResult.TotalPages,
-                    filteredResult.HasNext,
-                    filteredResult.HasPrevious
-                };
-
-                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+                AddHeaderPagination(filteredResult);
 
                 return filteredResult.Select(x => _mapper.Map<AdvertisementDto>(x));
             }
-
-
-
-
         }
-        [HttpGet("search/{input}")]
-        public async Task<IEnumerable<AdvertisementDto>> Search(string input, [FromQuery] AdvertisementParameters advertisementParameters)
+
+
+        [HttpGet("user-advertisements")]
+        public async Task<IEnumerable<UserAdvertisementDto>> Get([FromQuery] AdvertisementParameters advertisementParameters)
         {
-            var searchResult = await _advertisementRepository.Search(input, advertisementParameters);
+            var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
+            var userAds = await _advertisementRepository.GetCurrentUserAds(currentuser, advertisementParameters);
 
-            var metadata = new
-            {
-                searchResult.TotalCount,
-                searchResult.PageSize,
-                searchResult.CurrentPage,
-                searchResult.TotalPages,
-                searchResult.HasNext,
-                searchResult.HasPrevious
-            };
+            AddHeaderPagination(userAds);
 
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            return userAds.Select(x => _mapper.Map<UserAdvertisementDto>(x));
+        }
+
+
+        [AllowAnonymous]
+        [HttpGet("search/{keyword}")]
+        public async Task<IEnumerable<AdvertisementDto>> Search(string keyword, [FromQuery] AdvertisementParameters advertisementParameters)
+        {
+            var searchResult = await _advertisementRepository.Search(keyword, advertisementParameters);
+
+            AddHeaderPagination(searchResult);
 
             return searchResult.Select(x => _mapper.Map<AdvertisementDto>(x));
         }
 
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
-        public async Task<AdvertisementDetailDto> Get(int id)
+        public async Task<AdvertisementDetailDto> Details(int id)
         {
             var result = await _advertisementRepository.Get(id);
             return _mapper.Map<AdvertisementDetailDto>(result);
         }
 
 
-        [HttpPut("changeToPublished/{id}")]
-        public async Task ChangeToPublished(int id) => await _advertisementRepository.ChangeToPublished(id);
-
-        [HttpPut("report")]
-        public async Task ReportAdvertisement([FromForm] int id, [FromForm] string message) => await _advertisementRepository.ReportAdvertisement(id,message);
-
-
-        [HttpPut("report/{id}")]
-        public async Task RemoveReportAdvertisement(int id) => await _advertisementRepository.RemoveReportAdvertisement(id);
-
-        [HttpGet("report")]
-        public async Task<IEnumerable<AdvertisementDetailDto>> GetReports([FromQuery]AdvertisementParameters advertisementParameters)
+        [HttpPut("reports")]
+        public async Task InsertReport([FromForm] int id, [FromForm] string message)
         {
-          
-            var reports = await _advertisementRepository.GetReportedAdvertisements(advertisementParameters);
-
-            var metadata = new
-            {
-                reports.TotalCount,
-                reports.PageSize,
-                reports.CurrentPage,
-                reports.TotalPages,
-                reports.HasNext,
-                reports.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-            return reports.Select(x => _mapper.Map<AdvertisementDetailDto>(x));
+            await _advertisementRepository.ReportAdvertisement(id, message);
         }
 
-
-        [HttpDelete("unPublished/{id}")]
-        public async Task DeleteUnpublished(int id) => await _advertisementRepository.DeleteUnpublished(id);
-
-
-        [HttpGet("useradvertisement")]
-        public async Task<IEnumerable<UserAdvertisementDto>> Get([FromQuery] AdvertisementParameters advertisementParameters)
-        {
-            var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
-            var userAds = await _advertisementRepository.GetCurrentUserAds(currentuser, advertisementParameters);
-
-            var metadata = new
-            {
-                userAds.TotalCount,
-                userAds.PageSize,
-                userAds.CurrentPage,
-                userAds.TotalPages,
-                userAds.HasNext,
-                userAds.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-            return userAds.Select(x => _mapper.Map<UserAdvertisementDto>(x));
-        }
 
         [HttpPost]
         public async Task Post([FromForm] Advertisement advertisement)
@@ -218,9 +106,8 @@ namespace API.Controllers
 
 
         [HttpPut]
-        public async Task<IActionResult> Put([FromForm] Advertisement advertisement)
+        public async Task<IActionResult> Update([FromForm] Advertisement advertisement)
         {
-
             var userId = User.Claims.FirstOrDefault()?.Value;
             var ads = await _advertisementRepository.Get(advertisement.Id);
 
@@ -229,9 +116,9 @@ namespace API.Controllers
                 return NotFound();
             }
             await _advertisementRepository.Update(advertisement);
-            return Ok(advertisement);
-
+            return Ok();
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

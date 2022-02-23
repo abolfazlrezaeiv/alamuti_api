@@ -15,7 +15,7 @@ using System.Text;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -31,8 +31,6 @@ namespace API.Controllers
                 TokenValidationParameters tokenValidationParameters,
                 AuthRepository authRepository, IOTPSevice otpService)
         { 
-       
-
         _userManager = userManager;
             _tokenValidationParameters = tokenValidationParameters;
             _authRepository = authRepository;
@@ -41,8 +39,9 @@ namespace API.Controllers
         }
 
 
-        [HttpPost("/register")]
-        public async Task<IActionResult> Register([FromBody] UserRegistrationDto user)
+
+        [HttpPost("Authenticate")]
+        public async Task<IActionResult> Authenticate([FromBody] UserRegistrationDto user)
         {
             
 
@@ -94,7 +93,7 @@ namespace API.Controllers
 
 
        
-        [HttpPost("/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginRequestDto user)
         {
             if (ModelState.IsValid)
@@ -142,7 +141,36 @@ namespace API.Controllers
             }
 
 
-        
+        [HttpPost]
+        [Route("RefreshToken")]
+        public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await VerifyAndGenerateToken(tokenRequest);
+
+                if (result == null)
+                {
+                    return BadRequest(new RegistrationResponseDto()
+                    {
+                        Errors = new List<string>() {
+                            "Invalid tokens"
+                        },
+                        Success = false
+                    });
+                }
+
+                return Ok(result);
+            }
+
+            return BadRequest(new RegistrationResponseDto()
+            {
+                Errors = new List<string>() {
+                    "Invalid payload"
+                },
+                Success = false
+            });
+        }
 
         private async Task<AuthResult> GenerateJwtToken(IdentityUser user)
         {
@@ -175,8 +203,6 @@ namespace API.Controllers
                 Token = RandomString(35) + Guid.NewGuid(),
                 
             };
-
-
             await _authRepository.Add(refreshToken);
 
             return new AuthResult()
@@ -187,7 +213,6 @@ namespace API.Controllers
             };
         }
 
-       
 
         private string RandomString(int length)
         {
@@ -197,39 +222,6 @@ namespace API.Controllers
                 .Select(x => x[random.Next(x.Length)]).ToArray());
         }
 
-
-
-
-        [HttpPost]
-        [Route("/RefreshToken")]
-        public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
-        {
-            if (ModelState.IsValid)
-            {
-                var result = await VerifyAndGenerateToken(tokenRequest);
-
-                if (result == null)
-                {
-                    return BadRequest(new RegistrationResponseDto()
-                    {
-                        Errors = new List<string>() {
-                            "Invalid tokens"
-                        },
-                        Success = false
-                    });
-                }
-
-                return Ok(result);
-            }
-
-            return BadRequest(new RegistrationResponseDto()
-            {
-                Errors = new List<string>() {
-                    "Invalid payload"
-                },
-                Success = false
-            });
-        }
 
         private async Task<AuthResult?> VerifyAndGenerateToken(TokenRequest tokenRequest)
         {

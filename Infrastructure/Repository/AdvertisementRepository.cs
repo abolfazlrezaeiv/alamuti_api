@@ -32,17 +32,13 @@ namespace Infrastructure.Repository
 
         public async Task Delete(Advertisement entity)
         {
-
             var entityInDatabase = await _context.Advertisements.FindAsync(entity.Id);
             if (entityInDatabase == null)
             {
                 return;
             }
-
             _context.Advertisements.Remove(entity);
             await _context.SaveChangesAsync();
-
-
         }
 
 
@@ -64,12 +60,12 @@ namespace Infrastructure.Repository
 
             if (await alamutiGroup.AnyAsync() == false)
             {
-                await _messageRepository.AddChatGroup(new ChatGroup() { Name = "alamuti" + advertisement.UserId, Title = "الموتی", IsChecked = false });
+                await _messageRepository.AddGroup(new ChatGroup() { Name = "alamuti" + advertisement.UserId, Title = "الموتی", IsChecked = false });
             }
 
             var alamutiExistedGroup = await _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId).FirstAsync();
 
-            await _messageRepository.AddChatMessage("alamuti" + advertisement.UserId,
+            await _messageRepository.AddMessage("alamuti" + advertisement.UserId,
                 new ChatMessage() 
                 { 
                     ChatGroup = alamutiExistedGroup,
@@ -99,7 +95,7 @@ namespace Infrastructure.Repository
             var alamutiGroup = _context.ChatGroups.Where(x => x.Name == "alamuti" + advertisement.UserId);
             if (await alamutiGroup.AnyAsync() == false)
             {
-                await _messageRepository.AddChatGroup(new ChatGroup() { Name = "alamuti" + advertisement.UserId, Title = "الموتی", IsChecked = false });
+                await _messageRepository.AddGroup(new ChatGroup() { Name = "alamuti" + advertisement.UserId, Title = "الموتی", IsChecked = false });
             }
 
 
@@ -107,7 +103,7 @@ namespace Infrastructure.Repository
 
         
 
-            await _messageRepository.AddChatMessage("alamuti" + advertisement.UserId, new ChatMessage() { ChatGroup = alamutiExistedGroup, ChatGroupId = alamutiExistedGroup.Id, Sender = "الموتی", GroupName = alamutiExistedGroup.Name, Reciever = advertisement.UserId, Message = $"آگهی {advertisement.Title} به یکی از دلایل زیر تایید نشد :\n- مغایرت با قوانین الموتی\n- آگهی تکراری است" });
+            await _messageRepository.AddMessage("alamuti" + advertisement.UserId, new ChatMessage() { ChatGroup = alamutiExistedGroup, ChatGroupId = alamutiExistedGroup.Id, Sender = "الموتی", GroupName = alamutiExistedGroup.Name, Reciever = advertisement.UserId, Message = $"آگهی {advertisement.Title} به یکی از دلایل زیر تایید نشد :\n- مغایرت با قوانین الموتی\n- آگهی تکراری است" });
             _context.Advertisements.Remove(advertisement);
             await _context.SaveChangesAsync();
         }

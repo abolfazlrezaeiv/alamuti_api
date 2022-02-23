@@ -1,9 +1,7 @@
 ﻿using application.Interfaces.Data;
 using application.Interfaces.repository;
-using Domain.Entities;
 using Infrastructure.Data;
 using Infrastructure.Repository;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

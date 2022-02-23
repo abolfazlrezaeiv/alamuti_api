@@ -19,8 +19,9 @@ namespace API
 
         public async Task SendMessage(string receiverId, string senderId, string message, string groupNameFromClient, string grouptitle, string? groupImage)
         {
+
             //var groupnameFirstTime = $"{receiverId + senderId + grouptitle}";
-            var group = await _repository.GetGroupByName(groupNameFromClient);
+            var group = await _repository.GetGroupByGroupName(groupNameFromClient);
 
 
             if (group.IsDeleted == false)
@@ -29,7 +30,7 @@ namespace API
 
                 await Clients.Group(groupNameFromClient).SendAsync("ReceiveMessage", receiverId, senderId, message, groupNameFromClient, grouptitle);
 
-                await _repository.AddMessage(groupNameFromClient, new ChatMessage
+                await _repository.AddChatMessage(groupNameFromClient, new ChatMessage
                 {
                     Sender = senderId,
                     Reciever = receiverId,
@@ -45,9 +46,10 @@ namespace API
 
             await Clients.Group(receiverId).SendAsync("InitializeChat", receiverId, senderId, groupNameFromClient, grouptitle);
 
-            await _repository.AddGroup(new ChatGroup() { Name = groupNameFromClient, Title = grouptitle, Image = groupImage, IsChecked = false });
+            await _repository.AddChatGroup(new ChatGroup() { Name = groupNameFromClient, Title = grouptitle, Image = groupImage, IsChecked = false });
 
         }
+
 
 
         public async Task JoinToGroup(string groupId)
@@ -62,9 +64,9 @@ namespace API
 
         public async Task CreateNewGroup(string groupname, string title)
         {
-            await _repository.AddGroup(new ChatGroup() { Name = groupname, Title = title });
+            await _repository.AddChatGroup(new ChatGroup() { Name = groupname, Title = title });
 
-            await _repository.ConvertGroupToUnChecked(groupname);
+            await _repository.UpdateGroup(groupname);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupname);
         }

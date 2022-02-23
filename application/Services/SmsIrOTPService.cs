@@ -1,6 +1,4 @@
-﻿
-
-using application.Interfaces;
+﻿using application.Interfaces;
 using SmsIrRestfulNetCore;
 using System.Collections.Generic;
 
