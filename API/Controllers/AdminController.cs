@@ -30,10 +30,7 @@ namespace API.Controllers;
         public async Task<IActionResult> Publish(int id) 
         { 
             var result = await _unitOfWord.Admin.Publish(id);
-            if (result == null)
-            {
-                return NotFound();
-            }
+            if (result == null) return NotFound();
             await _unitOfWord.Chat.AddAlamutiChat(result, PublishStatus.accept);
             await _unitOfWord.CompleteAsync();
             return Ok(result);
@@ -60,10 +57,7 @@ namespace API.Controllers;
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _unitOfWord.Admin.Delete(id);
-            if (result is null)
-            {
-                return NotFound();
-            }
+            if (result is null) return NotFound();
             await _unitOfWord.Chat.AddAlamutiChat(result, PublishStatus.reject);
             await _unitOfWord.CompleteAsync();
             return Ok();
@@ -86,6 +80,6 @@ namespace API.Controllers;
         {
                 var result = await _unitOfWord.Admin.AllUnPublished(advertisementParameters);
                 AddHeaderPagination(result);
-                return Ok( result.Select(x => _mapper.Map<AdvertisementDto>(x)));
+                return Ok(result.Select(x => _mapper.Map<AdvertisementDto>(x)));
         }
     }
