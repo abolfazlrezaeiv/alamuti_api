@@ -1,4 +1,5 @@
-﻿using application.DTOs;
+﻿using Alamuti.Domain.Entities;
+using application.DTOs;
 using application.DTOs.Advertisement;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -10,18 +11,14 @@ using System.Threading.Tasks;
 
 namespace application.Interfaces.repository
 {
-    public interface IAdvertisementRepository : IRepository<Advertisement>
+    public interface IAdvertisementRepository : IGenericRepository<Advertisement>
     {
-        Task<PaginatedList<Advertisement>> GetCurrentUserAds(IdentityUser user, AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> GetUserAds(AlamutiUser user, AdvertisementParameters advertisementParameters);
         Task<PaginatedList<Advertisement>> Search(string input, AdvertisementParameters advertisementParameters);
-        Task<PaginatedList<Advertisement>> GetByFilter(string adstype, AdvertisementParameters advertisementParameters);
-        Task<PaginatedList<Advertisement>> GetAll(AdvertisementParameters advertisementParameters);
-        Task<PaginatedList<Advertisement>> GetAllUnpublished(AdvertisementParameters advertisementParameters);
-        Task ChangeToPublished(int id);
-        Task DeleteUnpublished(int id);
-        Task<PaginatedList<Advertisement>> GetUnpublishedUserAds(string userId, AdvertisementParameters advertisementParameters);
-        Task ReportAdvertisement(int id,string message);
-        Task RemoveReportAdvertisement(int id);
-        Task<PaginatedList<Advertisement>> GetReportedAdvertisements(AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> FilterByType(string adstype, AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> All(AdvertisementParameters advertisementParameters);
+        Task<bool> Update(string userId, Advertisement updatedData);
+        Task<bool> InsertReport(int id,string message);
+        Task<bool> Delete(int adsId, string userId);
     }
 }

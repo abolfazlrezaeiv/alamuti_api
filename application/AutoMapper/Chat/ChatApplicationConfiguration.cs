@@ -13,7 +13,6 @@ namespace application.AutoMapper.Chat
     {
         public ChatProfile()
         {
-
             CreateMap<ChatMessage, ChatMessageDto>()
                 .AddTransform<byte[]>(s => s.Length < 2 ? null : s)
                 .ForMember(dest =>
@@ -26,7 +25,6 @@ namespace application.AutoMapper.Chat
                    dest.LastMessage,
                       opt =>  opt.MapFrom(src => new ChatMessageDto
                       {
-                          
                           Sender = src.Messages.Last().Sender,
                           Reciever = src.Messages.Last().Reciever,
                           GroupName = src.Messages.Last().GroupName,

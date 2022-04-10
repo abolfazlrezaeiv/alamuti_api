@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Alamuti.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-
 
 namespace Domain.Entities
 {
@@ -17,6 +17,6 @@ namespace Domain.Entities
         public DateTime ExpiryDate { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        public IdentityUser User { get; set; }
+        public AlamutiUser User { get; set; }
     }
 }

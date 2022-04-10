@@ -1,3 +1,4 @@
+using Alamuti.Domain.Entities;
 using API;
 using application;
 using Infrastructure;
@@ -8,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,7 +55,6 @@ var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
 
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 
-
 var tokenValidationParameters = new TokenValidationParameters
 {
     ValidateIssuerSigningKey = true,
@@ -61,25 +63,31 @@ var tokenValidationParameters = new TokenValidationParameters
     ValidateAudience = false,
     ValidateLifetime = true,
     RequireExpirationTime = false,
-    ClockSkew = TimeSpan.Zero
+    ClockSkew = TimeSpan.Zero,
+    RoleClaimType = IdentityModel.JwtClaimTypes.Role,
+    NameClaimType = IdentityModel.JwtClaimTypes.Name
 };
 
 builder.Services.AddSingleton(tokenValidationParameters);
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireClaim(ClaimTypes.Role, "Admin"));
+});
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-   
+    options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
 })
     .AddJwtBearer(jwt =>
     {
-
         jwt.SaveToken = true;
         jwt.TokenValidationParameters = tokenValidationParameters;
     });
 
-builder.Services.AddIdentityCore<IdentityUser>(
+builder.Services.AddIdentityCore<AlamutiUser>(
     options =>
     {
         options.SignIn.RequireConfirmedAccount = true;
@@ -90,35 +98,32 @@ builder.Services.AddIdentityCore<IdentityUser>(
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireDigit = true;
         options.Password.RequiredLength = 4;
-    }).AddEntityFrameworkStores<AlamutDbContext>();
-
-
-
+    })
+    .AddRoles<IdentityRole>()
+    .AddRoleManager<RoleManager<IdentityRole>>()
+    .AddEntityFrameworkStores<AlamutDbContext>();
 
 var app = builder.Build();
-
-//app.UseDeveloperExceptionPage();
-//app.UseSwagger();
-//app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Alamuti v1"));
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Alamuti v1"));
 }
+else
+{
+    app.UseExceptionHandler("/error");
+}
 
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseCors("Open");
-
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapHub<ChatHub>("/chat");
-    endpoints.MapControllers();
-   
+    endpoints.MapControllers();  
 });
 
 app.Run();
@@ -132,23 +137,15 @@ internal class AuthResponsesOperationFilter : IOperationFilter
     {
         var attributes = context.MethodInfo.DeclaringType?.GetCustomAttributes(true)
                             .Union(context.MethodInfo.GetCustomAttributes(true));
-
-        if (attributes!.OfType<IAllowAnonymous>().Any())
-        {
-            return;
-        }
-
+        if (attributes!.OfType<IAllowAnonymous>().Any()) return;
         var authAttributes = attributes!.OfType<IAuthorizeData>();
-
         if (authAttributes.Any())
         {
             operation.Responses["401"] = new OpenApiResponse { Description = "Unauthorized" };
-
             if (authAttributes.Any(att => !String.IsNullOrWhiteSpace(att.Roles) || !String.IsNullOrWhiteSpace(att.Policy)))
             {
                 operation.Responses["403"] = new OpenApiResponse { Description = "Forbidden" };
             }
-
             operation.Security = new List<OpenApiSecurityRequirement>
                 {
                     new OpenApiSecurityRequirement

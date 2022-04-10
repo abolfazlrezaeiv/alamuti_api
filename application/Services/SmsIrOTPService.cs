@@ -12,8 +12,6 @@ namespace application.Services
             Token tk = new();
             string token = tk.GetToken("8449d52edcd7eab89db7d531", "it66)%#teBC!@*&");
 
-
-
             var ultraFastSend = new UltraFastSend()
             {
                 Mobile = long.Parse(phonenumber),
@@ -27,7 +25,6 @@ namespace application.Services
     }.ToArray()
 
             };
-
             new UltraFast().Send(token, ultraFastSend);
         }
     }

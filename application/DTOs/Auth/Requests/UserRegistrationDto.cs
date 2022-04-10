@@ -11,7 +11,5 @@ namespace application.DTOs.Requests
     {
         [Required]
         public string PhoneNumber { get; set; }
-     
-     
     }
 }

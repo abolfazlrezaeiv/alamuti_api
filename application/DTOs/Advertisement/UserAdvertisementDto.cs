@@ -12,8 +12,8 @@ namespace application.DTOs.Advertisement
         public string Title { get; set; }
         public string Description { get; set; }
         public int Price { get; set; }
-        public byte[] Photo1 { get; set; }
         public bool Published { get; set; }
+        public byte[] Photo1 { get; set; }
         public byte[] Photo2 { get; set; }
         public DateTime DatePosted { get; set; }
         public string UserId { get; set; }

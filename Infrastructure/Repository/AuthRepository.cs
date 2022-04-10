@@ -1,4 +1,6 @@
-﻿using application.DTOs.Requests;
+﻿using Alamuti.Application.Interfaces.repository;
+using Alamuti.Infrastructure.Repository;
+using application.DTOs.Requests;
 using application.Interfaces.repository;
 using Domain.Entities;
 using Infrastructure.Data;
@@ -11,39 +13,15 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repository
 {
-    public class AuthRepository 
+    public class AuthRepository : GenericRepository<RefreshToken> , IAuthRepository
     {
         private readonly AlamutDbContext _context;
-
-        public AuthRepository(AlamutDbContext context)
+        public AuthRepository(AlamutDbContext context) : base(context)
         {
             _context = context;
         }
 
-        public async Task Add(RefreshToken refreshToken)
-        {
-            await _context.RefreshTokens.AddAsync(refreshToken);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<RefreshToken> Get(TokenRequest tokenRequest)
-        {
-            return await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
-
-        }
-
-
-
-        public async Task Update(RefreshToken refreshToken)
-        {
-            _context.RefreshTokens.Update(refreshToken);
-            await _context.SaveChangesAsync();
-        }
-
-      
-
-       
-
-      
+        public async Task<RefreshToken> Get(TokenRequest tokenRequest) 
+            => await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == tokenRequest.RefreshToken);
     }
 }

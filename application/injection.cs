@@ -10,9 +10,7 @@ namespace application
 {
     public static class Injection
     {
-        public static IServiceCollection RegisterApplicationServices(
-             this IServiceCollection service,
-             IConfiguration configuration)
+        public static IServiceCollection RegisterApplicationServices(this IServiceCollection service, IConfiguration configuration)
         {
             service.AddAutoMapper(typeof(AdvertisementProfile),typeof(ChatProfile));
             service.AddScoped<IOTPSevice , SmsIrOTPService>();

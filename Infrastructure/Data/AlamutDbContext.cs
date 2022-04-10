@@ -1,4 +1,5 @@
-﻿using application.Interfaces.Data;
+﻿using Alamuti.Domain.Entities;
+using application.Interfaces.Data;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +15,7 @@ using System.Text;
 
 namespace Infrastructure.Data
 {
-    public class AlamutDbContext : IdentityDbContext, IAlamutDbContext
+    public class AlamutDbContext : IdentityDbContext<AlamutiUser>, IAlamutDbContext
     {
 
         public AlamutDbContext(DbContextOptions<AlamutDbContext> options) : base(options)
@@ -30,7 +31,6 @@ namespace Infrastructure.Data
             .Build();
 
             optionsBuilder.UseSqlServer(configuration.GetConnectionString("Alamut"));
-
             base.OnConfiguring(optionsBuilder);
         }
 

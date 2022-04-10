@@ -1,48 +1,73 @@
-﻿using application.DTOs;
+﻿using Alamuti.Application.Interfaces.UnitOfWork;
+using application.DTOs;
 using application.DTOs.Advertisement;
 using application.Interfaces.repository;
 using AutoMapper;
+using Domain.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace API.Controllers
-{
+namespace API.Controllers;
+
+    [Authorize(Policy = "AdminOnly")]
     [Route("api/admin")]
     [ApiController]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AdminController : BaseController
     {
-        private readonly IAdvertisementRepository _advertisementRepository;
+        private readonly IUnitOfWork _unitOfWord;
         private readonly IMapper _mapper;
 
-        public AdminController(IAdvertisementRepository advertisementRepository, IMapper mapper)
+        public AdminController(IUnitOfWork unitOfWord, IMapper mapper)
         {
-            _advertisementRepository = advertisementRepository;
+            _unitOfWord = unitOfWord;
             _mapper = mapper;
         }
 
 
         [HttpPut("advertisements/{id}")]
-        public async Task Publish(int id) => await _advertisementRepository.ChangeToPublished(id);
+        public async Task<IActionResult> Publish(int id) 
+        { 
+            var result = await _unitOfWord.Admin.Publish(id);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            await _unitOfWord.Chat.AddAlamutiChat(result, PublishStatus.accept);
+            await _unitOfWord.CompleteAsync();
+            return Ok(result);
+        }
 
 
         [HttpPut("reports/{id}")]
-        public async Task RemoveReport(int advertisementId) => await _advertisementRepository.RemoveReportAdvertisement(advertisementId);
+        public async Task RemoveReport(int advertisementId) 
+        { 
+            await _unitOfWord.Admin.CleanReport(advertisementId); 
+            await _unitOfWord.CompleteAsync();
+        }
 
 
-        [HttpGet("reports")]
+        [HttpGet("advertisements/reports")]
         public async Task<IEnumerable<AdvertisementDetailDto>> GetReports([FromQuery] AdvertisementParameters advertisementParameters)
         {
-            var reports = await _advertisementRepository.GetReportedAdvertisements(advertisementParameters);
-
+            var reports = await _unitOfWord.Admin.GetReportedAds(advertisementParameters);
             AddHeaderPagination(reports);
-
             return reports.Select(x => _mapper.Map<AdvertisementDetailDto>(x));
         }
 
         [HttpDelete("advertisements/{id}")]
-        public async Task DeleteUnpublished(int id) => await _advertisementRepository.DeleteUnpublished(id);
+        public async Task<IActionResult> Delete(int id)
+        {
+            var result = await _unitOfWord.Admin.Delete(id);
+            if (result is null)
+            {
+                return NotFound();
+            }
+            await _unitOfWord.Chat.AddAlamutiChat(result, PublishStatus.reject);
+            await _unitOfWord.CompleteAsync();
+            return Ok();
+        }
   
 
         [HttpGet("user-advertisements")]
@@ -50,22 +75,17 @@ namespace API.Controllers
           [FromQuery] string userId,
           [FromQuery] AdvertisementParameters advertisementParameters)
         {
-            var result = await _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
-
+            var result = await _unitOfWord.Admin.GetUserAds(userId, advertisementParameters);
             AddHeaderPagination(result);
-
             return result.Select(x => _mapper.Map<AdvertisementDto>(x));
         }
 
-
-        [HttpGet("unpublished-advertisements")]
-        public async Task<IEnumerable<AdvertisementDto>> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
+        [AllowAnonymous]
+        [HttpGet("advertisements")]
+        public async Task<IActionResult> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
         {
-            var result = await _advertisementRepository.GetAllUnpublished(advertisementParameters);
-
-            AddHeaderPagination(result);
-
-            return result.Select(x => _mapper.Map<AdvertisementDto>(x));
+                var result = await _unitOfWord.Admin.AllUnPublished(advertisementParameters);
+                AddHeaderPagination(result);
+                return Ok( result.Select(x => _mapper.Map<AdvertisementDto>(x)));
         }
     }
-}

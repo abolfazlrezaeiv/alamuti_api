@@ -1,6 +1,4 @@
-﻿
-
-namespace application.Interfaces
+﻿namespace application.Interfaces
 {
     public interface IOTPSevice
     {

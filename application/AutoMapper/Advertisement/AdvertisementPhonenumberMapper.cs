@@ -1,20 +1,32 @@
-﻿using application.DTOs.Advertisement;
+﻿using Alamuti.Domain.Entities;
+using application.DTOs.Advertisement;
 using AutoMapper;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
 
-public class MapPhoneNumber : IMappingAction<Advertisement, AdvertisementDetailDto>
+namespace application.AutoMapper
 {
-    private readonly UserManager<IdentityUser> _userManager;
-
-    public MapPhoneNumber(UserManager<IdentityUser> userManager)
+    public class MapPhoneNumber : IMappingAction<Advertisement, AdvertisementDetailDto>
     {
-        _userManager = userManager;
-    }
+        private readonly UserManager<AlamutiUser> _userManager;
+
+        public MapPhoneNumber(UserManager<AlamutiUser> userManager)
+        {
+            _userManager = userManager;
+        }
 
 
-    public void Process(Advertisement source, AdvertisementDetailDto destination, ResolutionContext context)
-    {
-        destination.PhoneNumber = _userManager.FindByIdAsync(source.UserId).Result.UserName;
+        public void Process(Advertisement source, AdvertisementDetailDto destination, ResolutionContext context)
+        {
+            var phoneNumber =  _userManager.FindByIdAsync(source.UserId).Result.UserName;
+            if (phoneNumber == null)
+            {
+                return;
+            }
+            destination.PhoneNumber = phoneNumber;
+        }
+
+       
     }
 }

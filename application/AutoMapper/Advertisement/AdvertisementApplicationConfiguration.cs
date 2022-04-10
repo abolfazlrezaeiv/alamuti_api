@@ -5,13 +5,10 @@ using Domain.Entities;
 
 namespace application.AutoMapper
 {
-    
-
     public class AdvertisementProfile : Profile
     {
         public AdvertisementProfile()
-        {
-          
+        { 
             CreateMap<Advertisement, AdvertisementDto>()
                 .AddTransform<byte[]>(s => s.Length < 2 ? null : s)
                 .ForMember(dest =>
@@ -30,7 +27,6 @@ namespace application.AutoMapper
               .ForMember(dest =>
                   dest.DaySended,
                   opt => opt.MapFrom(src => src.DatePosted.ToString()));
-
         }
     }
 }

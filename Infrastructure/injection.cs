@@ -1,4 +1,7 @@
-﻿using application.Interfaces.Data;
+﻿using Alamuti.Application.Interfaces.UnitOfWork;
+using Alamuti.Infrastructure.Repository;
+using Alamuti.Infrastructure.UnitOfWork;
+using application.Interfaces.Data;
 using application.Interfaces.repository;
 using Infrastructure.Data;
 using Infrastructure.Repository;
@@ -14,15 +17,14 @@ namespace Infrastructure
           this IServiceCollection service,
           IConfiguration configuration)
         {
+            service
+                .AddDbContext<AlamutDbContext>(options =>
+                            options
+                            .UseSqlServer(configuration
+                            .GetConnectionString("Alamut")));
 
-            service.AddDbContext<AlamutDbContext>(options =>
-                            options.UseSqlServer(configuration.GetConnectionString("Alamut")));
 
-           
-            service.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
-
-            service.AddScoped<AuthRepository>();
-            service.AddScoped<MessageRepository>();
+            service.AddScoped<IUnitOfWork, UnitOfWork>();
             return service;
         }
     }

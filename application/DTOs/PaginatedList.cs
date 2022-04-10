@@ -14,7 +14,7 @@ namespace application.DTOs
         public int TotalCount { get; private set; }
         public bool HasPrevious => CurrentPage > 1;
         public bool HasNext => CurrentPage < TotalPages;
-        public PaginatedList(List<T> items, int count, int pageNumber, int pageSize)
+        public PaginatedList(IQueryable<T> items, int count, int pageNumber, int pageSize)
         {
             TotalCount = count;
             PageSize = pageSize;
@@ -25,7 +25,7 @@ namespace application.DTOs
         public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageIndex, int pageSize)
         {
             var count = await source.CountAsync();
-            var items = await source.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToListAsync();
+            var items = source.Skip((pageIndex - 1) * pageSize).Take(pageSize);
             return new PaginatedList<T>(items, count, pageIndex, pageSize);
         }
     }
