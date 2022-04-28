@@ -8,5 +8,4 @@ ____
 - SignalR
 - JWT refresh token implementation
 - Paginated api response
-- 
 
