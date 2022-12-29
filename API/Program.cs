@@ -104,16 +104,16 @@ builder.Services.AddIdentityCore<AlamutiUser>(
     .AddEntityFrameworkStores<AlamutDbContext>();
 
 var app = builder.Build();
-if (app.Environment.IsDevelopment())
-{
+/*if (app.Environment.IsDevelopment())
+{*/
     app.UseDeveloperExceptionPage();
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Alamuti v1"));
-}
+/*}
 else
 {
     app.UseExceptionHandler("/error");
-}
+}*/
 
 app.UseHttpsRedirection();
 app.UseRouting();

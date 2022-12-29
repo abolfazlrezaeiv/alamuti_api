@@ -10,7 +10,7 @@ namespace application.Services
         public void SendMessage(string phonenumber, int code)
         {
             Token tk = new();
-            string token = tk.GetToken("");
+            string token = tk.GetToken("8449d52edcd7eab89db7d531", "it66)%#teBC!@*&");
 
             var ultraFastSend = new UltraFastSend()
             {

@@ -71,7 +71,7 @@ namespace API.Controllers;
         [HttpGet("{id}")]
         public async Task<AdvertisementDetailDto> Details(int id) => _mapper.Map<AdvertisementDetailDto>(await _unitOfWork.Advertisement.GetById(id));
 
-
+        [AllowAnonymous]
         [HttpPut("reports")]
         public async Task InsertReport([FromForm] int id, [FromForm] string message)
         {

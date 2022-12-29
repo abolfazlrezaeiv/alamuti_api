@@ -1,8 +1,10 @@
 ﻿using Alamuti.Application.Interfaces.UnitOfWork;
 using Alamuti.Infrastructure.Repository;
 using Alamuti.Infrastructure.UnitOfWork;
+using application.Interfaces;
 using application.Interfaces.Data;
 using application.Interfaces.repository;
+using application.Services;
 using Infrastructure.Data;
 using Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +24,7 @@ namespace Infrastructure
                             options
                             .UseSqlServer(configuration
                             .GetConnectionString("Alamut")));
+            service.AddScoped<IOTPSevice, SmsIrOTPService>();
 
 
             service.AddScoped<IUnitOfWork, UnitOfWork>();
