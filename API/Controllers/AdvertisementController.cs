@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-    [Route("api/advertisements")]
+    [Route("api/advertisement")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AdvertisementController : BaseController
@@ -47,7 +47,7 @@ namespace API.Controllers;
         }
 
 
-        [HttpGet("user-advertisements")]
+        [HttpGet("currentuser")]
         public async Task<IEnumerable<UserAdvertisementDto>> Get([FromQuery] AdvertisementParameters advertisementParameters)
         {
             var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
@@ -69,19 +69,19 @@ namespace API.Controllers;
 
         [AllowAnonymous]
         [HttpGet("{id}")]
-        public async Task<AdvertisementDetailDto> Details(int id) => _mapper.Map<AdvertisementDetailDto>(await _unitOfWork.Advertisement.GetById(id));
+        public async Task<AdvertisementDetailDto> GetById(int id) => _mapper.Map<AdvertisementDetailDto>(await _unitOfWork.Advertisement.GetById(id));
 
         [AllowAnonymous]
-        [HttpPut("reports")]
-        public async Task InsertReport([FromForm] int id, [FromForm] string message)
+        [HttpPut("report")]
+        public async Task InsertReport([FromBody] Report report)
         {
-            await _unitOfWork.Advertisement.InsertReport(id, message);
+            await _unitOfWork.Advertisement.InsertReport(report.Id  , report.Message);
             await _unitOfWork.CompleteAsync();
         }
 
 
         [HttpPost]
-        public async Task Post([FromForm] Advertisement advertisement)
+        public async Task Post([FromBody] Advertisement advertisement)
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
             advertisement.UserId = userId;
@@ -91,7 +91,7 @@ namespace API.Controllers;
 
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromForm] Advertisement advertisement)
+        public async Task<IActionResult> Update([FromBody] Advertisement advertisement)
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
             var result = await _unitOfWork.Advertisement.Update(userId, advertisement);

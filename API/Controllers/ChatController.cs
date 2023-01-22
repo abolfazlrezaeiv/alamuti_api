@@ -23,7 +23,7 @@ namespace API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("groups/{groupname}")]
+        [HttpGet("group/{groupname}")]
         public async Task<IActionResult> GetGroupByName(string groupname)
         {
             var result = await _unitOfWork.Chat.GetGroupByName(groupname);
@@ -31,7 +31,7 @@ namespace API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("groups/{groupname}/messages")]
+        [HttpGet("group/{groupname}/messages")]
         public async Task<IEnumerable<ChatMessageDto>> GetMessages(string groupname, [FromQuery] MessageParameters messageParameters)
         {
             var messages = await _unitOfWork.Chat.GetMessages(groupname, messageParameters);
@@ -39,7 +39,7 @@ namespace API.Controllers
             return messages.Select(message => _mapper.Map<ChatMessageDto>(message));
         }
 
-        [HttpGet("groups")]
+        [HttpGet("group")]
         public async Task<IEnumerable<ChatGroupDto>> GetGroups([FromQuery] MessageParameters messageParameters)
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
@@ -48,7 +48,7 @@ namespace API.Controllers
             return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
         }
 
-        [HttpGet("groups/no-paginated")]
+        [HttpGet("group/no-paginated")]
         public  IEnumerable<ChatGroupDto> GetAllGroups()
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
@@ -56,7 +56,7 @@ namespace API.Controllers
             return groups.Select(group => _mapper.Map<ChatGroupDto>(group));
         }
 
-        [HttpDelete("groups/{groupname}")]
+        [HttpDelete("group/{groupname}")]
         public async Task<IActionResult> Delete(string groupname)
         {
             var result = await _unitOfWork.Chat.DeleteGroup(groupname);
@@ -66,21 +66,21 @@ namespace API.Controllers
         }
 
 
-        [HttpPost("groups")]
+        [HttpPost("group")]
         public async void Insert([FromForm] ChatGroup group)
         {
             await _unitOfWork.Chat.AddGroup(group);
             await _unitOfWork.CompleteAsync();
         }
 
-        [HttpPut("groups/{groupname}")]
+        [HttpPut("group/{groupname}")]
         public async Task Update(string groupname)
         {
             await _unitOfWork.Chat.ToChecked(groupname);
             await _unitOfWork.CompleteAsync();
         }
 
-        [HttpPut("groups/report")]
+        [HttpPut("group/report")]
         public async Task<IActionResult> ReportChat([FromForm] string groupname, [FromForm]  string blockedUserId, [FromForm] string reportMessage)
         {
             var result = await _unitOfWork.Chat.ReportChat(groupname, blockedUserId, reportMessage);

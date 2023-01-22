@@ -26,7 +26,7 @@ namespace API.Controllers;
         }
 
 
-        [HttpPut("advertisements/{id}")]
+        [HttpPut("advertisement/{id}")]
         public async Task<IActionResult> Publish(int id) 
         { 
             var result = await _unitOfWord.Admin.Publish(id);
@@ -37,7 +37,7 @@ namespace API.Controllers;
         }
 
 
-        [HttpPut("reports/{id}")]
+        [HttpPut("report/{id}")]
         public async Task RemoveReport(int advertisementId) 
         { 
             await _unitOfWord.Admin.CleanReport(advertisementId); 
@@ -45,7 +45,7 @@ namespace API.Controllers;
         }
 
 
-        [HttpGet("advertisements/reports")]
+        [HttpGet("advertisement/reports")]
         public async Task<IEnumerable<AdvertisementDetailDto>> GetReports([FromQuery] AdvertisementParameters advertisementParameters)
         {
             var reports = await _unitOfWord.Admin.GetReportedAds(advertisementParameters);
@@ -53,7 +53,7 @@ namespace API.Controllers;
             return reports.Select(x => _mapper.Map<AdvertisementDetailDto>(x));
         }
 
-        [HttpDelete("advertisements/{id}")]
+        [HttpDelete("advertisement/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _unitOfWord.Admin.Delete(id);
@@ -75,7 +75,7 @@ namespace API.Controllers;
         }
 
         [AllowAnonymous]
-        [HttpGet("advertisements")]
+        [HttpGet("advertisement")]
         public async Task<IActionResult> GetAllUnPublished([FromQuery] AdvertisementParameters advertisementParameters)
         {
                 var result = await _unitOfWord.Admin.AllUnPublished(advertisementParameters);
