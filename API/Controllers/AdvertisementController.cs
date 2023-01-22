@@ -36,17 +36,7 @@ namespace API.Controllers
 
             var result = await _advertisementRepository.GetAllUnpublished(advertisementParameters);
 
-            var metadata = new
-            {
-                result.TotalCount,
-                result.PageSize,
-                result.CurrentPage,
-                result.TotalPages,
-                result.HasNext,
-                result.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            AddPaginationToHeader<Advertisement>(result);
 
             return result.Select(x => _mapper.Map<AdvertisementDto>(x));
 
@@ -59,23 +49,14 @@ namespace API.Controllers
         {
             var result = await _advertisementRepository.GetUnpublishedUserAds(userId, advertisementParameters);
 
-            var metadata = new
-            {
-                result.TotalCount,
-                result.PageSize,
-                result.CurrentPage,
-                result.TotalPages,
-                result.HasNext,
-                result.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            AddPaginationToHeader<Advertisement>(result);
 
             return result.Select(x => _mapper.Map<AdvertisementDto>(x));
 
 
         }
 
+        [AllowAnonymous]
         [HttpGet("filter/{adstype}")]
         public async Task<IEnumerable<AdvertisementDto>> GetAll([FromQuery] AdvertisementParameters advertisementParameters, string? adstype)
         {
@@ -84,34 +65,15 @@ namespace API.Controllers
             {
                 var allAdvertisement = await _advertisementRepository.GetAll(advertisementParameters);
 
-                var metadata = new
-                {
-                    allAdvertisement.TotalCount,
-                    allAdvertisement.PageSize,
-                    allAdvertisement.CurrentPage,
-                    allAdvertisement.TotalPages,
-                    allAdvertisement.HasNext,
-                    allAdvertisement.HasPrevious
-                };
+                AddPaginationToHeader<Advertisement>(allAdvertisement);
 
-                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
                 return allAdvertisement.Select(x => _mapper.Map<AdvertisementDto>(x));
             }
             else
             {
                 var filteredResult = await _advertisementRepository.GetAll(adstype, advertisementParameters);
 
-                var metadata = new
-                {
-                    filteredResult.TotalCount,
-                    filteredResult.PageSize,
-                    filteredResult.CurrentPage,
-                    filteredResult.TotalPages,
-                    filteredResult.HasNext,
-                    filteredResult.HasPrevious
-                };
-
-                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+                AddPaginationToHeader<Advertisement>(filteredResult);
 
                 return filteredResult.Select(x => _mapper.Map<AdvertisementDto>(x));
             }
@@ -120,27 +82,19 @@ namespace API.Controllers
 
 
         }
+
+        [AllowAnonymous]
         [HttpGet("search/{input}")]
         public async Task<IEnumerable<AdvertisementDto>> Search(string input, [FromQuery] AdvertisementParameters advertisementParameters)
         {
             var searchResult = await _advertisementRepository.Search(input, advertisementParameters);
 
-            var metadata = new
-            {
-                searchResult.TotalCount,
-                searchResult.PageSize,
-                searchResult.CurrentPage,
-                searchResult.TotalPages,
-                searchResult.HasNext,
-                searchResult.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            AddPaginationToHeader<Advertisement>(searchResult);
 
             return searchResult.Select(x => _mapper.Map<AdvertisementDto>(x));
         }
 
-
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<AdvertisementDetailDto> Get(int id)
         {
@@ -165,17 +119,7 @@ namespace API.Controllers
           
             var reports = await _advertisementRepository.GetReportedAdvertisements(advertisementParameters);
 
-            var metadata = new
-            {
-                reports.TotalCount,
-                reports.PageSize,
-                reports.CurrentPage,
-                reports.TotalPages,
-                reports.HasNext,
-                reports.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            AddPaginationToHeader<Advertisement>(reports);
 
             return reports.Select(x => _mapper.Map<AdvertisementDetailDto>(x));
         }
@@ -184,24 +128,14 @@ namespace API.Controllers
         [HttpDelete("unPublished/{id}")]
         public async Task<Advertisement> DeleteUnpublished(int id) => await _advertisementRepository.DeleteUnpublished(id);
 
-
+      
         [HttpGet("useradvertisement")]
         public async Task<IEnumerable<UserAdvertisementDto>> Get([FromQuery] AdvertisementParameters advertisementParameters)
         {
             var currentuser = await _userManager.FindByIdAsync(User.Claims.FirstOrDefault()?.Value);
             var userAds = await _advertisementRepository.GetCurrentUserAds(currentuser, advertisementParameters);
 
-            var metadata = new
-            {
-                userAds.TotalCount,
-                userAds.PageSize,
-                userAds.CurrentPage,
-                userAds.TotalPages,
-                userAds.HasNext,
-                userAds.HasPrevious
-            };
-
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            AddPaginationToHeader<Advertisement>(userAds);
 
             return userAds.Select(x => _mapper.Map<UserAdvertisementDto>(x));
         }
@@ -238,13 +172,29 @@ namespace API.Controllers
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
             var ads = await _advertisementRepository.Get(id);
-            if (ads.UserId == userId)
+            
+            if (ads != null && ads.UserId == userId)
             {
                 await _advertisementRepository.Delete(ads);
                 return Ok(ads);
             }
             return NotFound();
 
+        }
+
+        public Task AddPaginationToHeader<T>(PaginatedList<T> data)
+        {
+            var metadata = new
+            {
+                data.TotalCount,
+                data.PageSize,
+                data.CurrentPage,
+                data.TotalPages,
+                data.HasNext,
+                data.HasPrevious
+            };
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
         }
     }
 }
