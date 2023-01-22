@@ -172,8 +172,11 @@ namespace API.Controllers
         {
             var userId = User.Claims.FirstOrDefault()?.Value;
             var ads = await _advertisementRepository.Get(id);
-            
-            if (ads != null && ads.UserId == userId)
+            if (ads == null)
+            {
+                return BadRequest();
+            }
+            if (ads.UserId == userId)
             {
                 await _advertisementRepository.Delete(ads);
                 return Ok(ads);
@@ -182,7 +185,7 @@ namespace API.Controllers
 
         }
 
-        public Task AddPaginationToHeader<T>(PaginatedList<T> data)
+        public void AddPaginationToHeader<T>(PaginatedList<T> data)
         {
             var metadata = new
             {

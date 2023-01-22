@@ -18,8 +18,9 @@ namespace Domain.Entities
         public DateTime? DatePosted { get; set; } = DateTime.UtcNow;
         public string? ReportMessage { get; set; }
         public bool? Published { get; set; } = false;
+        public string? UserId { get; set; }
 #nullable disable
-        public string UserId { get; set; }
+
         public string Village { get; set; }
         public int? Area { get; set; }
 
