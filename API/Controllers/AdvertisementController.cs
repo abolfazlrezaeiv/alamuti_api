@@ -20,13 +20,13 @@ namespace API.Controllers;
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly UserManager<AlamutiUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
 
 
         public AdvertisementController(
             IUnitOfWork unitOfWork, 
             IMapper mapper,
-            UserManager<AlamutiUser> userManager
+            UserManager<IdentityUser> userManager
             )
         {
             _unitOfWork = unitOfWork;

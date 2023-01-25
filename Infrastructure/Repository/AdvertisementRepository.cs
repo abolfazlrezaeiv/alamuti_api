@@ -5,6 +5,7 @@ using application.DTOs.Advertisement;
 using application.Interfaces.repository;
 using Domain.Entities;
 using Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,7 +54,7 @@ namespace Infrastructure.Repository
                  advertisementParameters.PageSize);
         }
 
-        public async Task<PaginatedList<Advertisement>> GetUserAds(AlamutiUser user, AdvertisementParameters advertisementParameters)
+        public async Task<PaginatedList<Advertisement>> GetUserAds(IdentityUser user, AdvertisementParameters advertisementParameters)
         {
             return await PaginatedList<Advertisement>
               .CreateAsync(_context.Advertisements.AsNoTracking().Where(x => x.UserId == user.Id),

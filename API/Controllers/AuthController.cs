@@ -19,7 +19,7 @@ namespace API.Controllers;
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<AlamutiUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IUnitOfWork _unitOfWork;
         private readonly TokenValidationParameters _tokenValidationParameters;
@@ -27,7 +27,7 @@ namespace API.Controllers;
         private readonly JwtConfig _JwtConfig;
 
         public AuthController(
-            UserManager<AlamutiUser> userManager,
+            UserManager<IdentityUser> userManager,
             IOptionsMonitor<JwtConfig> optionsMonitor,
             TokenValidationParameters tokenValidationParameters,
             RoleManager<IdentityRole> roleManager,
@@ -59,7 +59,7 @@ namespace API.Controllers;
                     await _userManager.UpdateAsync(existingUser);
                     return Ok(new { id = existingUser.Id, phonenumber = existingUser.UserName });
                 }
-                AlamutiUser newUser = new() {UserName = user.PhoneNumber};
+            IdentityUser newUser = new() {UserName = user.PhoneNumber};
                 var isCreated = await _userManager.CreateAsync(newUser, generatedNumber.ToString());
                 if (!isCreated.Succeeded)
                 {
@@ -102,7 +102,7 @@ namespace API.Controllers;
             }
 
 
-            AlamutiUser newUser = new()
+        IdentityUser newUser = new()
             {
                 UserName = admin.PhoneNumber
             };
@@ -187,7 +187,7 @@ namespace API.Controllers;
             });
         }
 
-        private async Task<AuthResult> GenerateJwtToken(AlamutiUser user)
+        private async Task<AuthResult> GenerateJwtToken(IdentityUser user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_JwtConfig.Secret);
@@ -339,7 +339,7 @@ namespace API.Controllers;
             }
         }
 
-        private async Task AddRoleToUser(AlamutiUser user, string role)
+        private async Task AddRoleToUser(IdentityUser user, string role)
         {
             if (!await _roleManager.RoleExistsAsync("User"))
             {

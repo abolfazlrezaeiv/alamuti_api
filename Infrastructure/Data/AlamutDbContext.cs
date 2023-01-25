@@ -15,7 +15,7 @@ using System.Text;
 
 namespace Infrastructure.Data
 {
-    public class AlamutDbContext : IdentityDbContext<AlamutiUser>, IAlamutDbContext
+    public class AlamutDbContext : IdentityDbContext<IdentityUser>, IAlamutDbContext
     {
 
         public AlamutDbContext(DbContextOptions<AlamutDbContext> options) : base(options)

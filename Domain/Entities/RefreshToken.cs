@@ -17,6 +17,6 @@ namespace Domain.Entities
         public DateTime ExpiryDate { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        public AlamutiUser User { get; set; }
+        public IdentityUser User { get; set; }
     }
 }

@@ -87,7 +87,7 @@ builder.Services.AddAuthentication(options =>
         jwt.TokenValidationParameters = tokenValidationParameters;
     });
 
-builder.Services.AddIdentityCore<AlamutiUser>(
+builder.Services.AddIdentityCore<IdentityUser>(
     options =>
     {
         options.SignIn.RequireConfirmedAccount = true;

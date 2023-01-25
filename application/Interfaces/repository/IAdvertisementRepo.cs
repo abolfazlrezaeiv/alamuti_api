@@ -13,7 +13,7 @@ namespace application.Interfaces.repository
 {
     public interface IAdvertisementRepository : IGenericRepository<Advertisement>
     {
-        Task<PaginatedList<Advertisement>> GetUserAds(AlamutiUser user, AdvertisementParameters advertisementParameters);
+        Task<PaginatedList<Advertisement>> GetUserAds(IdentityUser user, AdvertisementParameters advertisementParameters);
         Task<PaginatedList<Advertisement>> Search(string input, AdvertisementParameters advertisementParameters);
         Task<PaginatedList<Advertisement>> FilterByType(string adstype, AdvertisementParameters advertisementParameters);
         Task<PaginatedList<Advertisement>> All(AdvertisementParameters advertisementParameters);

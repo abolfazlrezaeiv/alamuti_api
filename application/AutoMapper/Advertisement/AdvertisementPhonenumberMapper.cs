@@ -9,9 +9,9 @@ namespace application.AutoMapper
 {
     public class MapPhoneNumber : IMappingAction<Advertisement, AdvertisementDetailDto>
     {
-        private readonly UserManager<AlamutiUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public MapPhoneNumber(UserManager<AlamutiUser> userManager)
+        public MapPhoneNumber(UserManager<IdentityUser> userManager)
         {
             _userManager = userManager;
         }
